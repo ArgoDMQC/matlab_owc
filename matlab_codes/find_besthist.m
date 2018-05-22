@@ -1,5 +1,5 @@
 
-function [ index ] = find_besthist( grid_lat, grid_long, grid_dates, grid_Z, LAT, LONG, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, age, map_pv_use, max_casts )
+function [ index ] = find_besthist( grid_lat, grid_long, grid_dates, grid_Z, LAT, LONG, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, age, age_large, map_pv_use, max_casts )
 
 %
 % Find ln_max_casts unique historical points that are most strongly correlated with the float profile.
@@ -10,6 +10,9 @@ function [ index ] = find_besthist( grid_lat, grid_long, grid_dates, grid_Z, LAT
 % Annie Wong, June 2010.
 % Breck Owens, December 2006.
 %
+% Cecile Cabanes, June 2013
+% track "change config 129" : add age_large when computing correlation_large
+
 
 
 % avoid having PV=0, because if PV=0, ellipse>1, and no historical points will be selected ---
@@ -43,6 +46,7 @@ index=index_ellipse; %if <max_casts
 if(length(index_ellipse)>max_casts)
 
 %% pick max_casts/3 random points ---
+    rng(length(index_ellipse)); % ensures that the result will be the same each time the mapping is done with the same reference dataset
 
     index_random = round(rand(1,ceil(max_casts/3)).*length(hist_long));
     kk=find(index_random==0);
@@ -70,10 +74,15 @@ if(length(index_ellipse)>max_casts)
     PV_hist = (2*7.292*10^-5.*sin(remain_hist_lat.*pi/180))./remain_hist_Z;
 
     if( map_pv_use==1 ) % if PV is wanted
+        %correlation_large = (remain_hist_long-LONG).^2./longitude_large.^2 + (remain_hist_lat-LAT).^2./latitude_large.^2 +...
+        %    ( (PV_float-PV_hist)./sqrt( PV_float.^2+PV_hist.^2 )./phi_large ).^2 ;
         correlation_large = (remain_hist_long-LONG).^2./longitude_large.^2 + (remain_hist_lat-LAT).^2./latitude_large.^2 +...
-            ( (PV_float-PV_hist)./sqrt( PV_float.^2+PV_hist.^2 )./phi_large ).^2 ;
+            (remain_hist_dates-DATES).^2./age_large.^2 + ( (PV_float-PV_hist)./sqrt( PV_float.^2+PV_hist.^2 )./phi_large ).^2 ;
+        
     else % if PV is unwanted ---
-        correlation_large = (remain_hist_long-LONG).^2./longitude_large.^2 + (remain_hist_lat-LAT).^2./latitude_large.^2 ;
+       % correlation_large = (remain_hist_long-LONG).^2./longitude_large.^2 + (remain_hist_lat-LAT).^2./latitude_large.^2 ;
+        correlation_large = (remain_hist_long-LONG).^2./longitude_large.^2 + (remain_hist_lat-LAT).^2./latitude_large.^2 +...
+            (remain_hist_dates-DATES).^2./age_large.^2 ;
     end
 
     [ sorted_correlation_large, index_large ] = sort( correlation_large ) ;

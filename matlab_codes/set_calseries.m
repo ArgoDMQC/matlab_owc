@@ -26,7 +26,7 @@ disp('SET CALSERIES PARAMETERS')
 
 try
     load(ls_calseries_filename);
-    display(['***tip: to modify parameters, first delete the file: ' ls_calseries_filename])
+    display(['***tip: to modify these parameters, first delete the file: ' ls_calseries_filename ' and edit set_calseries.m'])
 catch
     breaks = [];
     max_breaks = 4;   % 0 for linear trend and -1 for offset only!
