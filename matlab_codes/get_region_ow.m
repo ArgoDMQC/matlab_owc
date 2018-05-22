@@ -1,5 +1,5 @@
 
-function [ pa_grid_lat, pa_grid_long, pa_grid_dates ] = get_region_ow( pa_wmo_numbers, pa_float_name, po_config_data ) ;
+function [ pa_grid_lat, pa_grid_long, pa_grid_dates ] = get_region_ow(pa_wmo_numbers, pa_float_name, po_config_data) ;
 
 % function [ pa_grid_lat, pa_grid_long, pa_grid_dates ] = get_region_ow( pa_wmo_numbers, pa_float_name, po_config_data ) ;
 %
@@ -17,7 +17,7 @@ function [ pa_grid_lat, pa_grid_long, pa_grid_dates ] = get_region_ow( pa_wmo_nu
 %
 % Annie Wong, December 2007
 % Breck Owens, December 2006
-
+% C.Cabanes (2015) to save time: load only long, lat, dates and source data 
 
 pa_grid_lat   = [ ] ;
 pa_grid_long  = [ ] ;
@@ -25,16 +25,32 @@ pa_grid_dates = [ ] ;
 
 [m,n]=size(pa_wmo_numbers);
 
+
+
+
+
 for ln_index = 1:m
     for ntyp = 2:4 % go through columns and check to see if this data type is supposed to be loaded
         if( ~isnan(pa_wmo_numbers(ln_index,1)) & pa_wmo_numbers(ln_index,ntyp) )
             if ntyp == 2 % the 2nd column denotes CTD data
-                lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_CTD_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
-            elseif ntyp == 3 % the 3rd column denotes historical data
-                lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_BOTTLE_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
-            elseif ntyp == 4 % the 4th column denotes Argo data
-                lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_ARGO_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
+            
+            %tic
+                %lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_CTD_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
+                lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_CTD_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))),'dates','lat','long','source');
+            %toc 
 
+                not_use=[];
+                date_hist = changedates(lo_box_data.dates);
+                lo_box_data.lat(not_use)=[];
+                lo_box_data.long(not_use)=[];
+                lo_box_data.dates(not_use)=[];
+                 
+            elseif ntyp == 3 % the 3rd column denotes historical data
+                %lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_BOTTLE_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
+                 lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_BOTTLE_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))),'dates','lat','long','source');
+            elseif ntyp == 4 % the 4th column denotes Argo data
+                %lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_ARGO_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
+                 lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_ARGO_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))),'dates','lat','long','source');
                 % exclude Argo float being analysed from the Argo reference data selection -------
                 not_use=[];
                 for i=1:length(lo_box_data.lat)
@@ -55,9 +71,9 @@ for ln_index = 1:m
             pa_grid_lat   = [ pa_grid_lat,   lo_box_data.lat ] ;
             pa_grid_long  = [ pa_grid_long,  lo_box_data.long ] ;
             pa_grid_dates = [ pa_grid_dates, lo_box_data.dates ] ;
-           
         end
     end
+    fclose('all');
 end
 
 
