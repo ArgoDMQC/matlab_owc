@@ -41,6 +41,10 @@ map_p_exclude = str2double( po_system_configuration.MAP_P_EXCLUDE );
 % load precalculated mapped data --------
 
 ls_float_mapped_filename = fullfile( po_system_configuration.FLOAT_MAPPED_DIRECTORY, pn_float_dir, strcat( po_system_configuration.FLOAT_MAPPED_PREFIX, pn_float_name, po_system_configuration.FLOAT_MAPPED_POSTFIX ) );
+
+disp(' ')
+disp(' CONFIGURATION PARAMETERS')
+disp('________________________________________')
 disp(['ln_max_casts :' num2str(ln_max_casts)])
 disp(['map_use_pv :' num2str(map_use_pv)])
 disp(['map_use_saf :' num2str(map_use_saf)])
@@ -53,6 +57,8 @@ disp(['phi_small :' num2str(phi_small)])
 disp(['map_age :' num2str(map_age)])
 disp(['map_p_delta :' num2str(map_p_delta)])
 disp(['map_p_exclude :' num2str(map_p_exclude)])
+disp('__________________________________________')
+disp(' ')
 
 
 disp(['Float mapped file ' ls_float_mapped_filename])
@@ -98,7 +104,7 @@ clear a i
 for i = 1 : length( missing_profile_index )
 
   disp(['UPDATE_SALINITY_MAPPING: Working on profile ' num2str(i)])
-
+  tic
   j = missing_profile_index( i ) ;
   ln_profile_index = ln_profile_index + 1 ;
 
@@ -319,6 +325,7 @@ for i = 1 : length( missing_profile_index )
         end %for ln_level = 1:ln_number_used_levels
      end %if( la_grid_lat==999 )
   end %if(isnan(LONG)==0&isnan(LAT)==0)
+  toc
 end %for i = 1 : length( missing_profile_index )
 
 

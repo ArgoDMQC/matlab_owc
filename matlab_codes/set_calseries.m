@@ -20,13 +20,19 @@ ls_calseries_filename = strcat( po_system_configuration.FLOAT_CALIB_DIRECTORY, p
 
 
 % build default values ---
+disp(' ')
+disp('___________________________________________')
+disp('SET CALSERIES PARAMETERS')
 
 try
     load(ls_calseries_filename);
+    display(['***tip: to modify parameters, first delete the file: ' ls_calseries_filename])
 catch
     breaks = [];
-    max_breaks = 4;
-    calseries = ones(1,n);
+    max_breaks = 4;   % 0 for linear trend and -1 for offset only!
+    calseries = [ones(1,n)];
+    % calseries = [ones(1,33) 2*ones(1,n-33)];    % example: split the time series at profile 33
+    % calseries = [ones(1,33) 0  ones(1,n-33-1)]; % example: ignore profile 34
     calib_profile_no = PROFILE_NO;
     use_theta_lt = [];
     use_theta_gt = [];
@@ -34,12 +40,16 @@ catch
     use_pres_lt = [];
     use_percent_gt = 0.5;
 end
-disp(' ')
-disp('set calseries parameters')
+
+display(['calseries: ' num2str(calseries)])
+display(['breaks = ' num2str(breaks)])
+display(['max_breaks = ' num2str(max_breaks)])
 display(['use_theta_lt = ' num2str(use_theta_lt)])
 display(['use_theta_gt = ' num2str(use_theta_gt)])
 display(['use_pres_gt = ' num2str(use_pres_gt)])
 display(['use_pres_lt = ' num2str(use_pres_lt)])
+disp('___________________________________________')
+disp(' ')
 
 % to enhance backward compatiability because I added a new variable "use_percent_gt" and changed 99999 to [] in Sep08 ---
 

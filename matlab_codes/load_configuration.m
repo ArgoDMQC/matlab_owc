@@ -25,6 +25,13 @@ function [ pt_input_parameters ] = load_configuration( ps_filename )
 %  Jason Fabritz, 2001
 %
 
+disp(' ')
+disp('__________________________________________')
+disp('CONFIGURATION FILE')
+disp('__________________________________________')
+disp(ps_filename)
+disp(' ')
+
 lh_file = fopen( ps_filename ) ;
 
 pt_input_parameters = struct( 'CONFIGURATION_FILE', ps_filename ) ;
