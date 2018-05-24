@@ -70,6 +70,9 @@ function [xfit, condslope, condslope_err, time_deriv, time_deriv_err, sta_mean, 
 % Jones, R.H. and I. Dey, 1995, Determining one or more change points.
 % Chemistry and Physics of Lipids, 76, 1-6.
 %
+%
+% Cecile Cabanes, 2017: force the fit to an offset only if NDF <13. and display
+% a warning : to track change see change config 129
 
 if nargin < 4
     disp('FIT_COND inputs must have at least 4 arguments')
@@ -263,6 +266,10 @@ end
 % if too few profiles, limit fit to offset only
 if nprof < 6
     disp(['WARNING: Only have ' num2str(nprof) ' good profiles, will estimate offset only'])
+    pbrk = -1;
+end
+if NDF < 13
+   disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, will estimate offset only'])  % change config 129
     pbrk = -1;
 end
 

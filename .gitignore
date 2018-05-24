@@ -1,2 +1,4 @@
 ow_config_*
 ow_calibration_*
+set_calseries_*
+~$*

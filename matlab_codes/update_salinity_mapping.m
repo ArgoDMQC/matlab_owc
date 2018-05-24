@@ -11,6 +11,11 @@ function update_salinity_mapping( pn_float_dir, pn_float_name, po_system_configu
 % po_system_configuration = load_configuration( 'ow_config.txt' );
 
 
+% Cecile Cabanes, June 2013 : use of "map_age_large" the time scale used to mapped the large scale field
+% to track modifications: see "changes config 129"  in this program
+ 
+
+
 % load float source data ----------------------------------------
 
 filename = fullfile( po_system_configuration.FLOAT_SOURCE_DIRECTORY, pn_float_dir, strcat( pn_float_name, po_system_configuration.FLOAT_SOURCE_POSTFIX ) );
@@ -34,6 +39,9 @@ latitude_small  = str2double( po_system_configuration.MAPSCALE_LATITUDE_SMALL );
 phi_large = str2double( po_system_configuration.MAPSCALE_PHI_LARGE );
 phi_small = str2double( po_system_configuration.MAPSCALE_PHI_SMALL );
 map_age = str2double( po_system_configuration.MAPSCALE_AGE );
+%% added CC
+map_age_large = str2double( po_system_configuration.MAPSCALE_AGE_LARGE );
+%%
 map_p_delta = str2double( po_system_configuration.MAP_P_DELTA );
 map_p_exclude = str2double( po_system_configuration.MAP_P_EXCLUDE );
 
@@ -41,6 +49,11 @@ map_p_exclude = str2double( po_system_configuration.MAP_P_EXCLUDE );
 % load precalculated mapped data --------
 
 ls_float_mapped_filename = fullfile( po_system_configuration.FLOAT_MAPPED_DIRECTORY, pn_float_dir, strcat( po_system_configuration.FLOAT_MAPPED_PREFIX, pn_float_name, po_system_configuration.FLOAT_MAPPED_POSTFIX ) );
+
+disp(' ')
+disp(' CONFIGURATION PARAMETERS')
+disp('________________________________________')
+disp(['wmo_boxes file :' po_system_configuration.CONFIG_WMO_BOXES])
 disp(['ln_max_casts :' num2str(ln_max_casts)])
 disp(['map_use_pv :' num2str(map_use_pv)])
 disp(['map_use_saf :' num2str(map_use_saf)])
@@ -51,9 +64,11 @@ disp(['latitude_small :' num2str(latitude_small)])
 disp(['phi_large :' num2str(phi_large)])
 disp(['phi_small :' num2str(phi_small)])
 disp(['map_age :' num2str(map_age)])
+disp(['map_age_large :' num2str(map_age_large)])
 disp(['map_p_delta :' num2str(map_p_delta)])
 disp(['map_p_exclude :' num2str(map_p_exclude)])
-
+disp('__________________________________________')
+disp(' ')
 
 disp(['Float mapped file ' ls_float_mapped_filename])
 if exist( ls_float_mapped_filename, 'file' )
@@ -96,7 +111,7 @@ clear a i
 % update mapped data matrix by missing_profile_index --------------------
 
 for i = 1 : length( missing_profile_index )
-
+tic
   disp(['UPDATE_SALINITY_MAPPING: Working on profile ' num2str(i)])
 
   j = missing_profile_index( i ) ;
@@ -120,6 +135,7 @@ for i = 1 : length( missing_profile_index )
   scale_phi_large ( ln_profile_index ) = NaN;
   scale_phi_small ( ln_profile_index ) = NaN;
   scale_age ( ln_profile_index ) = NaN;
+  scale_age_large ( ln_profile_index ) = NaN;
   use_pv ( ln_profile_index ) = NaN;
   use_saf ( ln_profile_index ) = NaN;
   p_delta ( ln_profile_index ) = NaN;
@@ -173,9 +189,12 @@ for i = 1 : length( missing_profile_index )
         end
 
         % find ln_max_casts historical points that are most strongly correlated with the float profile
-
-	[ index ] = find_besthist( la_grid_lat, la_grid_long, la_grid_dates, la_grid_Z, LAT, LONG2, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, map_age, map_use_pv, ln_max_casts );
+        
+        %[ index ] = find_besthist( la_grid_lat, la_grid_long, la_grid_dates, la_grid_Z, LAT, LONG2, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, map_age, map_use_pv, ln_max_casts );      % change config 129 
+	[ index ] = find_besthist( la_grid_lat, la_grid_long, la_grid_dates, la_grid_Z, LAT, LONG2, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, map_age,map_age_large, map_use_pv, ln_max_casts );
+	
         clear la_grid_lat la_grid_long la_grid_dates
+        
 	[ la_bhist_sal, la_bhist_ptmp, la_bhist_pres, la_bhist_lat, la_bhist_long, la_bhist_dates ] = retr_region_ow( la_wmo_numbers, pn_float_name, po_system_configuration, index, PRES, map_p_delta ) ;
         la_bhist_Z = la_grid_Z(index);
 
@@ -245,8 +264,9 @@ for i = 1 : length( missing_profile_index )
             la_hist_Z = la_hist_Z(ii) ;
 
             % map historical data to float profiles -------------------------
-
-            if( length(la_hist_sal)>1 ) % only proceed with mapping if there are more than one data point
+            %if( length(la_hist_sal)>1 ) % only proceed with mapping if there are more than one data point 
+            %  change config 129 -> at least 5 points are required   
+            if( length(la_hist_sal)>5 ) % only proceed with mapping if there are more than five data point
 
                % check for outliers
 
@@ -266,11 +286,19 @@ for i = 1 : length( missing_profile_index )
 
 	       noise_sal  = noise( la_hist_sal, la_hist_lat, la_hist_long ) ;
                signal_sal = signal( la_hist_sal ) ;
+               
+               % change config 129
+               
+%                  [a1,b1,c1,d1]...
+%                  = map_data_grid( la_hist_sal, [ LAT, LONG, DATES, Z ], ...
+%                           [ la_hist_lat, la_hist_long, la_hist_dates, la_hist_Z ], ...
+%                           longitude_large, latitude_large, NaN, signal_sal, noise_sal, phi_large, map_use_pv ) ;
+
 
                [a1,b1,c1,d1]...
 		= map_data_grid( la_hist_sal, [ LAT, LONG, DATES, Z ], ...
 			 [ la_hist_lat, la_hist_long, la_hist_dates, la_hist_Z ], ...
-			 longitude_large, latitude_large, NaN, signal_sal, noise_sal, phi_large, map_use_pv ) ;
+			 longitude_large, latitude_large, map_age_large, signal_sal, noise_sal, phi_large, map_use_pv ) ;
 
                % use short length scales and temporal scales to map residuals
 
@@ -284,7 +312,8 @@ for i = 1 : length( missing_profile_index )
 
                la_ptmp( ln_level, ln_profile_index ) = PTMP(ln_level);
                la_mapped_sal(  ln_level, ln_profile_index ) = a1' + a2' ;
-               la_mapsalerrors(ln_level, ln_profile_index ) = b2' ;
+               %la_mapsalerrors(ln_level, ln_profile_index ) = b2' ; 
+               la_mapsalerrors(ln_level, ln_profile_index ) = sqrt(b1'.*b1' + b2'*b2') ; %change config 129 ;
                la_noise_sal(   ln_level, ln_profile_index ) = noise_sal ;
                la_signal_sal(  ln_level, ln_profile_index ) = signal_sal ;
                scale_long_large( ln_profile_index ) = longitude_large ;
@@ -294,6 +323,7 @@ for i = 1 : length( missing_profile_index )
                scale_phi_large ( ln_profile_index ) = phi_large ;
                scale_phi_small ( ln_profile_index ) = phi_small ;
                scale_age ( ln_profile_index ) = map_age ;
+               scale_age_large ( ln_profile_index ) = map_age_large ;
                use_pv ( ln_profile_index ) = map_use_pv ;
                use_saf ( ln_profile_index ) = map_use_saf ;
                p_delta ( ln_profile_index ) = map_p_delta ;
@@ -319,6 +349,8 @@ for i = 1 : length( missing_profile_index )
         end %for ln_level = 1:ln_number_used_levels
      end %if( la_grid_lat==999 )
   end %if(isnan(LONG)==0&isnan(LAT)==0)
+  toc
+  fclose('all');
 end %for i = 1 : length( missing_profile_index )
 
 
@@ -344,6 +376,7 @@ scale_lat_small = scale_lat_small (ii) ;
 scale_phi_large = scale_phi_large(ii) ;
 scale_phi_small = scale_phi_small(ii) ;
 scale_age = scale_age(ii) ;
+scale_age_large = scale_age_large(ii) ;
 use_pv = use_pv(ii) ;
 use_saf = use_saf(ii) ;
 p_delta = p_delta(ii) ;
@@ -355,12 +388,12 @@ if(isempty(selected_hist)==0)
   selected_hist = selected_hist(ii,:) ;
 end
 
-
+%keyboard
 % save the relevant data ----------------
 
 save( ls_float_mapped_filename, 'la_ptmp', 'la_mapped_sal', 'la_mapsalerrors', ...
       'scale_long_large', 'scale_lat_large', 'scale_long_small', 'scale_lat_small', ...
-      'scale_phi_large', 'scale_phi_small', 'scale_age', 'use_pv', 'use_saf', 'p_delta', 'p_exclude', ...
+      'scale_phi_large', 'scale_phi_small', 'scale_age', 'scale_age_large', 'use_pv', 'use_saf', 'p_delta', 'p_exclude', ...
       'la_noise_sal', 'la_signal_sal', 'la_profile_no', 'selected_hist') ;
 
 

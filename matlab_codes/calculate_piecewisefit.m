@@ -1,10 +1,13 @@
- 
+
 function calculate_piecewisefit( pn_float_dir, pn_float_name, po_system_configuration )
 
 %
 % Annie Wong, October 2008
 % Breck Owens, November 2007
+
+
 %
+% Cecile Cabanes, June 2013 : calculate off-diagonal terms for error estimate: add horizontal covariance   to track changes: see "change config 129"
 
 %pn_float_dir='testfloats/';
 %pn_float_name='robbins4900178';
@@ -29,6 +32,29 @@ lo_float_mapped_data = load( strcat( po_system_configuration.FLOAT_MAPPED_DIRECT
 mapped_sal = lo_float_mapped_data.la_mapped_sal; % salinity from climatology mapped to float locations and times
 mapsalerrors = lo_float_mapped_data.la_mapsalerrors; % mapping errors for salinity
 la_ptmp = lo_float_mapped_data.la_ptmp; % float potential temperature where mapping is done
+
+
+
+%+++++ change config 129----FROM HERE
+
+% retrieve coordinate (XYZ) of the float position (coord_float) that is used in build_cov.m
+if ~isempty(lo_float_mapped_data.selected_hist)
+
+    % Calculate elevation at the float position 
+
+    if(LONG>180) % m_tbase inputs longitudes from 0 to +/- 180
+        LONG1=LONG-360;
+    else
+        LONG1=LONG;
+    end
+    m_proj('mercator','long', [min(LONG1)-1, max(LONG1)+1], 'lat', [min(LAT)-1, max(LAT)+1] );
+    [elev,x,y] = m_tbase( [min(LONG1)-1, max(LONG1)+1, min(LAT)-1, max(LAT)+1] );
+    Z = -interp2( x,y,elev, LONG1, LAT, 'linear'); % -ve bathy values
+
+    coord_float=[LONG',LAT',Z'];
+    
+end
+%+++++ change config 129-----TO HERE
 
 
 % load calibration settings -----------------
@@ -170,7 +196,10 @@ for i=1:n_seq
 
             % calculate off-diagonal terms for error estimate --------
 
-            covariance = build_ptmp_cov(ten_PTMP); % build the data covariance matrix
+            %covariance = build_ptmp_cov(ten_PTMP); % build the data covariance matrix   % vertical covariance only
+            
+            covariance = build_cov(ten_PTMP,coord_float,po_system_configuration);   % change config 129 :  vertical and horizontal covariances
+
 
             % for debugging purposes to speed up calculations, use next line for first time calculation
             % and then comment out the call to build_ptmp_cov and load the covariance matrix
@@ -186,7 +215,7 @@ for i=1:n_seq
             if isempty(breaks)
                 [xfit(calindex), pcond_factor(calindex), pcond_factor_err(calindex), time_deriv(calindex), ...
                  time_deriv_err(calindex), sta_mean(calindex), sta_rms(calindex), NDF, fitcoef, fitbreaks] = ...
-                  fit_cond(x, y, err, covariance, 'max_no_breaks', max_breaks(i));
+                  fit_cond(x, y, err, covariance, 'max_no_breaks', max_breaks(i));       
             else
                 breaks_in = breaks(i,:);
                 breaks_in = breaks_in(find(isfinite(breaks_in)));
@@ -197,7 +226,7 @@ for i=1:n_seq
                 else
                     [xfit(calindex), pcond_factor(calindex), pcond_factor_err(calindex), time_deriv(calindex), ...
                      time_deriv_err(calindex), sta_mean(calindex), sta_rms(calindex), NDF, fitcoef, fitbreaks] = ...
-                      fit_cond(x, y, err, covariance, 'breaks', breaks_in, 'max_no_breaks', max_breaks(i));
+                      fit_cond(x, y, err, covariance, 'breaks', breaks_in, 'max_no_breaks', max_breaks(i)); 
                 end
             end
 
@@ -208,13 +237,13 @@ for i=1:n_seq
                 unique_COND = sw_c3515*sw_cndr( unique_SAL, unique_PTMP, 0);
                 cal_COND(:,calindex) = ( ones(m,1)*pcond_factor(calindex) ).*unique_COND;
                 cal_SAL(:,calindex) = sw_salt( cal_COND(:,calindex)/sw_c3515, unique_PTMP, 0);
-
+%pcond_factor(calindex)
                 % estimate the error in salinity ---------------------------------
-
+%pcond_factor_err(calindex)
                 cal_COND_err(:,calindex) = ( ones(m,1)*pcond_factor_err(calindex) ).*unique_COND;
                 cal_SAL1(:,calindex) = sw_salt( (cal_COND(:,calindex)+cal_COND_err(:,calindex))/sw_c3515, unique_PTMP, 0 );
                 cal_SAL_err(:,calindex) = abs(cal_SAL(:,calindex)-cal_SAL1(:,calindex));
-
+               % keyboard
                 % estimate the error in salinity for station by station fit ----
 
                 sta_COND(:,calindex) = ( ones(m,1)*sta_mean(calindex) ).*unique_COND;

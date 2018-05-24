@@ -9,6 +9,7 @@
 %
 % A. Wong, 16 August 2004
 %
+% C. Cabanes Nov. 2014 : extend la_x, so interp2 does not think longitudes in the range [5W 5E] are out-of-bound with matlab version >= R2012b
 
 function [ pa_wmo_numbers ] = find_25boxes( pn_float_long, pn_float_lat, pa_wmo_boxes ) ;
 
@@ -18,20 +19,22 @@ la_lookup_x = [ ] ;
 la_lookup_y = [ ] ;
 vector_x = [] ;
 vector_y = [] ;
-
-la_x = [ 5:10:355 ] ; % 36 elements
+%keyboard
+la_x = [ -5:10:365 ] ; % 38 elements
 for i=1:18
   la_lookup_x = [ la_lookup_x; la_x ] ;
 end
 
 la_y = [ 85:-10:-85 ] ; % 18 elements
-for i=1:36
+for i=1:38
   la_lookup_y = [ la_lookup_y, la_y' ];
   vector_y = [ vector_y; la_y' ];
   vector_x = [ vector_x; la_x(i).*ones(18,1) ];
 end
 
 la_lookup_no=reshape( [ 1:648 ], 18, 36 ) ;
+la_lookup_no=[la_lookup_no(:,end),la_lookup_no,la_lookup_no(:,1)];
+
 
 ln_x1 = pn_float_long +.01;
 ln_x2 = pn_float_long + 10.01;
@@ -134,4 +137,4 @@ if( isnan(ln_i22)==0 )pa_wmo_numbers(22,:)=pa_wmo_boxes(ln_i22,:);end;
 if( isnan(ln_i23)==0 )pa_wmo_numbers(23,:)=pa_wmo_boxes(ln_i23,:);end;
 if( isnan(ln_i24)==0 )pa_wmo_numbers(24,:)=pa_wmo_boxes(ln_i24,:);end;
 if( isnan(ln_i25)==0 )pa_wmo_numbers(25,:)=pa_wmo_boxes(ln_i25,:);end;
-
+%keyboard
