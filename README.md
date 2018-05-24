@@ -34,12 +34,12 @@ Then, create/update your ./data/constants/wmo\_boxes.mat file (more details in .
 
 4. After you have decided where you want to install the package on your computer, edit ow\_config.txt at the following lines so the correct pathways are specified:
 
-HISTORICAL\_DIRECTORY =
-FLOAT\_SOURCE\_DIRECTORY =
-FLOAT\_MAPPED\_DIRECTORY =
-FLOAT\_CALIB\_DIRECTORY =
-FLOAT\_PLOTS\_DIRECTORY =
-CONFIG\_DIRECTORY =
+* HISTORICAL\_DIRECTORY =
+* FLOAT\_SOURCE\_DIRECTORY =
+* FLOAT\_MAPPED\_DIRECTORY =
+* FLOAT\_CALIB\_DIRECTORY =
+* FLOAT\_PLOTS\_DIRECTORY =
+* CONFIG\_DIRECTORY =
 
 5. The last section of ow\_config.txt below the heading "Objective Mapping Parameters" is where you set the various parameters (more details in .doc.README.doc, p4-6)
 
