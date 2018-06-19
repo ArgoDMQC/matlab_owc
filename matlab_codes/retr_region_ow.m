@@ -20,6 +20,8 @@ function [ pa_grid_sal, pa_grid_ptmp, pa_grid_pres, pa_grid_lat, pa_grid_long, p
 %
 % modified from get_region.m, Dec 2006, Breck Owens.
 %
+% Isabelle Gaboury, 26 Sep. 2017: Added check on the dimensions of bottle data.
+
 
 
 zz = find(isnan(P)==0);
@@ -44,9 +46,16 @@ for ln_index = 1:length(pa_wmo_numbers)
                 lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_CTD_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
             elseif ntyp == 3 % the 3rd column denotes historical data
                 lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_BOTTLE_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
+                 % In some cases the dimensions of the data may not match, causing issues with indexing below 
+                if numel(lo_box_data.lat)==numel(lo_box_data.pres) && size(lo_box_data.lat,2)~=size(lo_box_data.pres,2)
+                    lo_box_data.pres = lo_box_data.pres';
+                    lo_box_data.ptmp = lo_box_data.ptmp';
+                    lo_box_data.sal = lo_box_data.sal';
+                    lo_box_data.temp = lo_box_data.temp';
+                end
             elseif ntyp == 4 % the 4th column denotes Argo data
                 lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_ARGO_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
-
+                keyboard
                 % exclude Argo float being analysed from the Argo reference data selection,
                 % must do this step before concatenating the vectors, because "index" comes
                 % from "get_region_ow.m", which includes this step ---------------------
