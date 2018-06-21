@@ -79,6 +79,7 @@ MAPSCALE_PHI_SMALL=0.1
 
 % temporal decorrelation scale, in years
 MAPSCALE_AGE=10
+MAPSCALE_AGE_LARGE=20
 
 % exclude the top xxx dbar of the water column
 MAP_P_EXCLUDE=200
