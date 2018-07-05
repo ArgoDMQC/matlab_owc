@@ -55,7 +55,6 @@ for ln_index = 1:length(pa_wmo_numbers)
                 end
             elseif ntyp == 4 % the 4th column denotes Argo data
                 lo_box_data = load( strcat( po_config_data.HISTORICAL_DIRECTORY, po_config_data.HISTORICAL_ARGO_PREFIX, sprintf( '%4d', pa_wmo_numbers(ln_index,1))));
-                keyboard
                 % exclude Argo float being analysed from the Argo reference data selection,
                 % must do this step before concatenating the vectors, because "index" comes
                 % from "get_region_ow.m", which includes this step ---------------------
