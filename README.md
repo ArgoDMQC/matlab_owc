@@ -1,4 +1,4 @@
-# The Matlab OW toolbox
+# The Matlab OWC toolbox
 
 This is a package of MATLAB routines for calibrating profiling float conductivity sensor drift. A description of the algorithms can be found in "An improved calibration method for the drift of the conductivity sensor on autonomous CTD profiling floats by θ-S climatology", by W.B. Owens and A.P.S. Wong, in Deep-Sea Research Part I: Oceanographic Research Papers, 56(3), 450-457, 2009.
 Lately,  modifications suggested in “Improvement of bias detection in Argo float conductivity sensors and its application in the North Atlantic” , by C. Cabanes, V. Thierry and C. Lagadec, in Deep-Sea Research Part I, 114, 128-136, 2016  have been taken into account. 
