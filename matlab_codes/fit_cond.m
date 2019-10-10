@@ -79,7 +79,9 @@ if nargin < 4
     return
 end
 
-
+if exist('lsqnonlin')==0
+disp('Using LMA.m instead of optimization toolbox functions')
+end
 
 % variables for the non-liner least squares fitting routine
 global A breaks nbr1 ubrk_g
@@ -333,7 +335,8 @@ for nbr = pbrk
                     % need to shuffle returned breaks to include ones that are set.
                 catch % if error in lsqnonlin get last iteration
                     %#### need to fix the following
-                     ubrk resnorm residual] = LMA(ubrk_g);
+                     %[ubrk resnorm residual] = LMA(ubrk_g);
+                    [ubrk resnorm residual] = LMA(ubrk_g(nbr1:nbr));  %ccabanes fix
                 end
                 ubrk = [ubrk_g(1:nbr1-1) ubrk];
             end
