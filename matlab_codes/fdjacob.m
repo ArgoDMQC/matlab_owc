@@ -1,7 +1,11 @@
 function J = fdjacob(x,y,W_i,ubrk)
 
-epsilon = 0.1;  %??????
+% Cecile Cabanes, 2019 (CC) changes of LMA.m &fdjacob.m to get similar convergence and
+% solutions as lsqnonlin.m with the option 'levenberg-marquardt'
+% (optimization toolbox function)
 
+epsilon = sqrt(eps);  % CC
+%epsilon=0.1;       %??????
 m=length(x);
 n=length(ubrk);
 
