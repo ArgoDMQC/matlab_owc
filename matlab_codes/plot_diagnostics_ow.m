@@ -137,10 +137,16 @@ xticks=get(h,'XTick');
 xticklabels=get(h,'XTickLabel');
 ii=find(xticks>360);
 xticks(ii)=xticks(ii)-360;
+
 for j=1:length(ii)
   enough=num2str(ones(3,1));
   c=char(num2str(xticks(ii(j))),enough');
+  if ischar(xticklabels)
   xticklabels(ii(j),:)=c(1,:);
+  end
+  if iscell(xticklabels)
+  xticklabels(ii(j),:)=cellstr(c(1,:));  % Matt Donnelly: fix issue in Matlab 2016b
+  end
 end
 set(gca,'XTickLabel',xticklabels);
 
