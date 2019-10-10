@@ -13,7 +13,9 @@ function update_salinity_mapping( pn_float_dir, pn_float_name, po_system_configu
 
 % Cecile Cabanes, June 2013 : use of "map_age_large" the time scale used to mapped the large scale field
 % to track modifications: see "changes config 129"  in this program
- 
+%
+% Giulio Notarstefano, Dec 2018: modify the threshold values for the
+% quality control of mapped salinities in the Black Sea
 
 
 % load float source data ----------------------------------------
@@ -357,8 +359,11 @@ end %for i = 1 : length( missing_profile_index )
 % quality control - subst all mapped_sal < 30 and > 40 with NaNs ----------
 
 ii = find( la_mapped_sal<30|la_mapped_sal>40 ) ;
-la_mapped_sal(ii) = NaN.*ones( 1,length(ii) ) ;
+if min(lo_float_source_data.LAT)>41 && max(lo_float_source_data.LAT)<48 && min(lo_float_source_data.LONG)>27 && max(lo_float_source_data.LONG)<42 
+ii = find( la_mapped_sal<15|la_mapped_sal>25 ) ;  % GN -> Black Sea
+end
 
+la_mapped_sal(ii) = NaN.*ones( 1,length(ii) ) ;
 
 % sort the mapped data matrix by profile numbers ------------
 
