@@ -15,6 +15,7 @@ function [tlevels, plevels, index, var_s_Thetalevels, Thetalevels] = find_10thet
 % Thetalevels = thetas on which the salinity variances are calculated
 %
 % A.Wong, March 2009.
+% Giulio Notarstefano (GN), Dec 2018: allows theta min and max values with a 2-digits precision
 %------------------------------------------------------------------------------------------
 
 %SAL=unique_SAL;
@@ -99,8 +100,11 @@ end
 % Equally divide PRES into 50 dbar bins, then linearly interpolate PTMP onto
 % these Preslevels. The Thetalevels are the mean of the interpolated PTMP.
 
-minTheta = ceil(min(min(PTMP))*10)/10;
-maxTheta = floor(max(max(PTMP))*10)/10;
+
+%minTheta = ceil(min(min(PTMP))*10)/10;
+%maxTheta = floor(max(max(PTMP))*10)/10;
+minTheta = ceil(min(min(PTMP))*100)/100;  % GN
+maxTheta = floor(max(max(PTMP))*100)/100;
 
 if(minTheta<maxTheta) % no levels when no valid theta range --
 
