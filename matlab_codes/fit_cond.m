@@ -78,6 +78,9 @@ if nargin < 4
     disp('FIT_COND inputs must have at least 4 arguments')
     return
 end
+
+
+
 % variables for the non-liner least squares fitting routine
 global A breaks nbr1 ubrk_g
 global xf yf W_i xblim
@@ -268,9 +271,21 @@ if nprof < 6
     disp(['WARNING: Only have ' num2str(nprof) ' good profiles, will estimate offset only'])
     pbrk = -1;
 end
-if NDF < 13
+
+if NDF < 2*(max_brk+2)+1   % if NDF is low, AIC criterium will not be valid anymore, there is a maximum number of breakpoints that can be tried
+   if NDF>2*(nbr1+2)+1
+   pbrk =[nbr1:floor((NDF-1)/2 -2)]; 
+   disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, there is a maximum number of breakpoints that can be tried (' num2str(max(pbrk)) ')'])  % change config 129
+   else
+   pbrk = nbr;
+   max_brk =nbr;
+   nbr1=nbr;
+   if pbrk==-1
    disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, will estimate offset only'])  % change config 129
-    pbrk = -1;
+   else
+   disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, will estimate fit with fixed breakpoints only'])  % change config 129
+   end
+   end
 end
 
 %% Now evaluate range of fits
@@ -318,7 +333,7 @@ for nbr = pbrk
                     % need to shuffle returned breaks to include ones that are set.
                 catch % if error in lsqnonlin get last iteration
                     %#### need to fix the following
-                    [ubrk resnorm residual] = LMA(ubrk_g);
+                     ubrk resnorm residual] = LMA(ubrk_g);
                 end
                 ubrk = [ubrk_g(1:nbr1-1) ubrk];
             end
