@@ -268,25 +268,27 @@ else % no break points entered
     pbrk = nbr1:max_brk;
 end
 
-% if too few profiles, limit fit to offset only
-if nprof < 6
-    disp(['WARNING: Only have ' num2str(nprof) ' good profiles, will estimate offset only'])
-    pbrk = -1;
-end
+% if too few profiles, limit fit to offset only %    ccabanes: this test is replaced with the test on NDF
+% if nprof < 6
+    % disp(['WARNING: Only have ' num2str(nprof) ' good profiles, will estimate offset only'])
+    % pbrk = -1;
+% end
 
 if NDF < 2*(max_brk+2)+1   % if NDF is low, AIC criterium will not be valid anymore, there is a maximum number of breakpoints that can be tried
    if NDF>2*(nbr1+2)+1
    pbrk =[nbr1:floor((NDF-1)/2 -2)]; 
    disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, there is a maximum number of breakpoints that can be tried (' num2str(max(pbrk)) ')'])  % change config 129
    else
-   pbrk = nbr;
-   max_brk =nbr;
-   nbr1=nbr;
-   if pbrk==-1
-   disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, will estimate offset only'])  % change config 129
-   else
-   disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, will estimate fit with fixed breakpoints only'])  % change config 129
-   end
+	   if setbreaks==1 %
+	   pbrk = nbr;
+	   max_brk =nbr;
+	   nbr1=nbr;
+	   disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, will estimate fit with fixed breakpoints only'])  % change config 129
+	   else
+	   pbrk = -1;
+	   disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, will estimate offset only'])  % change config 129
+	   end
+   
    end
 end
 
