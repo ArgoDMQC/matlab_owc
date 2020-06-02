@@ -151,6 +151,7 @@ for i=1:n_seq
     k = length(calindex);
 
         % choose 10 float theta levels to use in the piecewise linear fit --------
+        unique_coord_float = coord_float(calindex,:); % ccabanes 01/06/2020
 
         unique_SAL = SAL(:, calindex);
         unique_PTMP = PTMP(:, calindex);
@@ -198,7 +199,8 @@ for i=1:n_seq
 
             %covariance = build_ptmp_cov(ten_PTMP); % build the data covariance matrix   % vertical covariance only
             
-            covariance = build_cov(ten_PTMP,coord_float,po_system_configuration);   % change config 129 :  vertical and horizontal covariances
+            %covariance = build_cov(ten_PTMP,coord_float,po_system_configuration);   % change config 129 :  vertical and horizontal covariances
+            covariance = build_cov(ten_PTMP,unique_coord_float,po_system_configuration);   % ccabanes 01/06/2020
 
 
             % for debugging purposes to speed up calculations, use next line for first time calculation
