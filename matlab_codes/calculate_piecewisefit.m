@@ -39,7 +39,14 @@ la_ptmp = lo_float_mapped_data.la_ptmp; % float potential temperature where mapp
 
 % retrieve coordinate (XYZ) of the float position (coord_float) that is used in build_cov.m
 if ~isempty(lo_float_mapped_data.selected_hist)
-
+    % the following lines were added to make sure LONG and LAT are stored in
+    % column vectors (from Dirk Slawinski-CSIRO) 
+    if size(LONG,1)>1 
+        LONG=LONG';
+    end
+    if size(LAT,1)>1  
+        LAT=LAT';
+    end
     % Calculate elevation at the float position 
 
     if(LONG>180) % m_tbase inputs longitudes from 0 to +/- 180
