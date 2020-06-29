@@ -57,6 +57,12 @@ CONFIG_SAF=TypicalProfileAroundSAF.mat
 %
 %    Objective Mapping Parameters
 %
+% In the subpolar North Atlantic, it is recommended to use scales of:
+% MAPSCALE_LONGITUDE_LARGE=3.2 MAPSCALE_LONGITUDE_SMALL=2,
+% MAPSCALE_LATITUDE_LARGE=2 MAPSCALE_LATITUDE_SMALL=1, 
+% MAPSCALE_PHI_LARGE=0.1   MAPSCALE_PHI_SMALL=0.02  (MAP_USE_PV=1)
+% MAPSCALE_AGE_LARGE=2 and MAPSCALE_AGE_SMALL=0.69
+
 
 % max number of historical casts used in objective mapping
 CONFIG_MAX_CASTS=300
@@ -78,8 +84,9 @@ MAPSCALE_PHI_LARGE=0.5
 MAPSCALE_PHI_SMALL=0.1
 
 % temporal decorrelation scale, in years
-MAPSCALE_AGE=10
 MAPSCALE_AGE_LARGE=20
+MAPSCALE_AGE_SMALL=10
+
 
 % exclude the top xxx dbar of the water column
 MAP_P_EXCLUDE=200

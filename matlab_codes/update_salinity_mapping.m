@@ -16,7 +16,10 @@ function update_salinity_mapping( pn_float_dir, pn_float_name, po_system_configu
 %
 % Giulio Notarstefano, Dec 2018: modify the threshold values for the
 % quality control of mapped salinities in the Black Sea
-
+%
+% Annie Wong, June 2020: rename "scale_age" to "scale_age_small", and create "scale_age_large" with NaN for old OW mapped profiles.
+% This is to make the temporal scale variable names consistent with the lat/long scale variable names in OWC.
+%
 
 % load float source data ----------------------------------------
 
@@ -40,7 +43,7 @@ latitude_large  = str2double( po_system_configuration.MAPSCALE_LATITUDE_LARGE );
 latitude_small  = str2double( po_system_configuration.MAPSCALE_LATITUDE_SMALL );
 phi_large = str2double( po_system_configuration.MAPSCALE_PHI_LARGE );
 phi_small = str2double( po_system_configuration.MAPSCALE_PHI_SMALL );
-map_age = str2double( po_system_configuration.MAPSCALE_AGE );
+map_age_small = str2double( po_system_configuration.MAPSCALE_AGE_SMALL );  %AW June 2020
 %% added CC
 map_age_large = str2double( po_system_configuration.MAPSCALE_AGE_LARGE );
 %%
@@ -52,34 +55,25 @@ map_p_exclude = str2double( po_system_configuration.MAP_P_EXCLUDE );
 
 ls_float_mapped_filename = fullfile( po_system_configuration.FLOAT_MAPPED_DIRECTORY, pn_float_dir, strcat( po_system_configuration.FLOAT_MAPPED_PREFIX, pn_float_name, po_system_configuration.FLOAT_MAPPED_POSTFIX ) );
 
-disp(' ')
-disp(' CONFIGURATION PARAMETERS')
-disp('________________________________________')
-disp(['wmo_boxes file :' po_system_configuration.CONFIG_WMO_BOXES])
-disp(['ln_max_casts :' num2str(ln_max_casts)])
-disp(['map_use_pv :' num2str(map_use_pv)])
-disp(['map_use_saf :' num2str(map_use_saf)])
-disp(['longitude_large :' num2str(longitude_large)])
-disp(['longitude_small :' num2str(longitude_small)])
-disp(['latitude_large :' num2str(latitude_large)])
-disp(['latitude_small :' num2str(latitude_small)])
-disp(['phi_large :' num2str(phi_large)])
-disp(['phi_small :' num2str(phi_small)])
-disp(['map_age :' num2str(map_age)])
-disp(['map_age_large :' num2str(map_age_large)])
-disp(['map_p_delta :' num2str(map_p_delta)])
-disp(['map_p_exclude :' num2str(map_p_exclude)])
-disp('__________________________________________')
-disp(' ')
-
-disp(['Float mapped file ' ls_float_mapped_filename])
 if exist( ls_float_mapped_filename, 'file' )
-   load( ls_float_mapped_filename ) ;
-   ln_profile_index = size( la_mapped_sal, 2 ) ;
+   load( ls_float_mapped_filename );
+   ln_profile_index = size( la_mapped_sal, 2 );
+   
    % check to see if this an older run without saf
    if ~exist('use_saf', 'var')
-       use_saf = zeros(size(use_pv));
+      use_saf = zeros(size(use_pv));
    end
+
+   % check to see if this is an older run with scale_age and no scale_age_large --- AW June 2020
+   if exist('scale_age', 'var')
+      scale_age_small = scale_age;
+      clear scale_age
+   end
+
+   if ~exist('scale_age_large', 'var')
+      scale_age_large = NaN.*ones(1,length(scale_age_small));
+   end
+   % check to see if this is an older run with scale_age and no scale_age_large --- AW June 2020
 
    [ max_depth, how_many_cols ] = size(la_mapped_sal);
    new_depth = ln_float_level_count;
@@ -113,7 +107,7 @@ clear a i
 % update mapped data matrix by missing_profile_index --------------------
 
 for i = 1 : length( missing_profile_index )
-tic
+  tic
   disp(['UPDATE_SALINITY_MAPPING: Working on profile ' num2str(i)])
 
   j = missing_profile_index( i ) ;
@@ -136,7 +130,7 @@ tic
   scale_lat_small ( ln_profile_index ) = NaN;
   scale_phi_large ( ln_profile_index ) = NaN;
   scale_phi_small ( ln_profile_index ) = NaN;
-  scale_age ( ln_profile_index ) = NaN;
+  scale_age_small ( ln_profile_index ) = NaN; %AW June 2020
   scale_age_large ( ln_profile_index ) = NaN;
   use_pv ( ln_profile_index ) = NaN;
   use_saf ( ln_profile_index ) = NaN;
@@ -193,7 +187,7 @@ tic
         % find ln_max_casts historical points that are most strongly correlated with the float profile
         
         %[ index ] = find_besthist( la_grid_lat, la_grid_long, la_grid_dates, la_grid_Z, LAT, LONG2, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, map_age, map_use_pv, ln_max_casts );      % change config 129 
-	[ index ] = find_besthist( la_grid_lat, la_grid_long, la_grid_dates, la_grid_Z, LAT, LONG2, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, map_age,map_age_large, map_use_pv, ln_max_casts );
+	[ index ] = find_besthist( la_grid_lat, la_grid_long, la_grid_dates, la_grid_Z, LAT, LONG2, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, map_age_small, map_age_large, map_use_pv, ln_max_casts );  %AW June 2020
 	
         clear la_grid_lat la_grid_long la_grid_dates
         
@@ -310,7 +304,7 @@ tic
                [a2,b2,c2,d2]...
                 = map_data_grid( la_residualsal1, [ LAT, LONG, DATES, Z ], ...
                          [ la_hist_lat, la_hist_long, la_hist_dates, la_hist_Z ], ...
-                         longitude_small, latitude_small, map_age, la_signalresidualsal, noise_sal, phi_small, map_use_pv ) ;
+				 longitude_small, latitude_small, map_age_small, la_signalresidualsal, noise_sal, phi_small, map_use_pv ) ;  %AW June 2020
 
                la_ptmp( ln_level, ln_profile_index ) = PTMP(ln_level);
                la_mapped_sal(  ln_level, ln_profile_index ) = a1' + a2' ;
@@ -324,7 +318,7 @@ tic
                scale_lat_small ( ln_profile_index ) = latitude_small ;
                scale_phi_large ( ln_profile_index ) = phi_large ;
                scale_phi_small ( ln_profile_index ) = phi_small ;
-               scale_age ( ln_profile_index ) = map_age ;
+               scale_age_small ( ln_profile_index ) = map_age_small ;  %AW June 2020
                scale_age_large ( ln_profile_index ) = map_age_large ;
                use_pv ( ln_profile_index ) = map_use_pv ;
                use_saf ( ln_profile_index ) = map_use_saf ;
@@ -380,7 +374,7 @@ scale_long_small= scale_long_small(ii) ;
 scale_lat_small = scale_lat_small (ii) ;
 scale_phi_large = scale_phi_large(ii) ;
 scale_phi_small = scale_phi_small(ii) ;
-scale_age = scale_age(ii) ;
+scale_age_small = scale_age_small(ii) ;  %AW June 2020
 scale_age_large = scale_age_large(ii) ;
 use_pv = use_pv(ii) ;
 use_saf = use_saf(ii) ;
@@ -398,8 +392,8 @@ end
 
 save( ls_float_mapped_filename, 'la_ptmp', 'la_mapped_sal', 'la_mapsalerrors', ...
       'scale_long_large', 'scale_lat_large', 'scale_long_small', 'scale_lat_small', ...
-      'scale_phi_large', 'scale_phi_small', 'scale_age', 'scale_age_large', 'use_pv', 'use_saf', 'p_delta', 'p_exclude', ...
-      'la_noise_sal', 'la_signal_sal', 'la_profile_no', 'selected_hist') ;
+      'scale_phi_large', 'scale_phi_small', 'scale_age_small', 'scale_age_large', 'use_pv', 'use_saf', 'p_delta', 'p_exclude', ...
+      'la_noise_sal', 'la_signal_sal', 'la_profile_no', 'selected_hist') ;  %AW June 2020
 
 
 % clear memory ----
