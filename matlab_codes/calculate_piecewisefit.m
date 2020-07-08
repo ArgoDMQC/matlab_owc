@@ -207,9 +207,10 @@ for i=1:n_seq
             %covariance = build_ptmp_cov(ten_PTMP); % build the data covariance matrix   % vertical covariance only
             
             %covariance = build_cov(ten_PTMP,coord_float,po_system_configuration);   % change config 129 :  vertical and horizontal covariances
-            covariance = build_cov(ten_PTMP,unique_coord_float,po_system_configuration);   % ccabanes 01/06/2020
+            %covariance = build_cov(ten_PTMP,unique_coord_float,po_system_configuration);   % ccabanes 01/06/2020
 
-
+            covariance = build_ptmp_xyt_cov(ten_PTMP,unique_coord_float,po_system_configuration);   % ccabanes 08/07/2020
+			
             % for debugging purposes to speed up calculations, use next line for first time calculation
             % and then comment out the call to build_ptmp_cov and load the covariance matrix
 
