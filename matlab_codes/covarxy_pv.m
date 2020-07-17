@@ -26,8 +26,8 @@ one=ones(n(1),1);
 
 % derive planetary vorticity at each data point ----
 
-Zx1=x1(:,3); % depth at x1 datapoint
-Zx2=x2(:,3); % depth at x2 datapoint
+Zx1=x1(:,4); % depth at x1 datapoint
+Zx2=x2(:,4); % depth at x2 datapoint
 
 PV_x1=(2*7.292*10^-5.*sin(x1(:,1).*pi/180))./Zx1;
 PV_x2=(2*7.292*10^-5.*sin(x2(:,1).*pi/180))./Zx2;

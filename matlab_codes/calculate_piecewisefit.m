@@ -37,9 +37,9 @@ la_ptmp = lo_float_mapped_data.la_ptmp; % float potential temperature where mapp
 
 %+++++ change config 129----FROM HERE
 
-% retrieve coordinate (XYZ) of the float position (coord_float) that is used in build_cov.m
+% retrieve coordinate (XYTZ) of the float position (coord_float) that is used in build_cov.m
 if ~isempty(lo_float_mapped_data.selected_hist)
-    % the following lines were added to make sure LONG and LAT are stored in
+% the following lines were added to make sure LONG, LAT, DATES are stored in
     % column vectors (from Dirk Slawinski-CSIRO) 
     if size(LONG,1)>1 
         LONG=LONG';
@@ -47,8 +47,11 @@ if ~isempty(lo_float_mapped_data.selected_hist)
     if size(LAT,1)>1  
         LAT=LAT';
     end
-    % Calculate elevation at the float position 
+    if size(DATES,1)>1
+        DATES=DATES';
+    end
 
+    % Calculate elevation at the float position 
     if(LONG>180) % m_tbase inputs longitudes from 0 to +/- 180
         LONG1=LONG-360;
     else
@@ -58,7 +61,7 @@ if ~isempty(lo_float_mapped_data.selected_hist)
     [elev,x,y] = m_tbase( [min(LONG1)-1, max(LONG1)+1, min(LAT)-1, max(LAT)+1] );
     Z = -interp2( x,y,elev, LONG1, LAT, 'linear'); % -ve bathy values
 
-    coord_float=[LONG',LAT',Z'];
+    coord_float=[LONG',LAT',DATES',Z'];
     
 end
 %+++++ change config 129-----TO HERE
@@ -206,11 +209,10 @@ for i=1:n_seq
 
             %covariance = build_ptmp_cov(ten_PTMP); % build the data covariance matrix   % vertical covariance only
             
-            %covariance = build_cov(ten_PTMP,coord_float,po_system_configuration);   % change config 129 :  vertical and horizontal covariances
-            %covariance = build_cov(ten_PTMP,unique_coord_float,po_system_configuration);   % ccabanes 01/06/2020
+            %covariance = build_ptmp_xy_cov(ten_PTMP,unique_coord_float,po_system_configuration);   % change config 129 :  vertical and horizontal covariances
+            covariance = build_ptmp_xyt_cov(ten_PTMP,unique_coord_float,po_system_configuration);   % ccabanes 01/06/2020
 
-            covariance = build_ptmp_xyt_cov(ten_PTMP,unique_coord_float,po_system_configuration);   % ccabanes 08/07/2020
-			
+
             % for debugging purposes to speed up calculations, use next line for first time calculation
             % and then comment out the call to build_ptmp_cov and load the covariance matrix
 
