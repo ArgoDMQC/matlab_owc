@@ -225,6 +225,7 @@ if nvarargin > 0
                     breaks=value{:};
                     breaks = (breaks-x0)/xscale;
                     nbr = length(breaks);
+                    nbr0=nbr;  % fix ccabanes 6/10/2020
                     setbreaks=1;
                 end
             otherwise,
@@ -337,7 +338,8 @@ for nbr = pbrk
             ubrk_g(n) = log((b_g(n+1)-b_g(n))/(1-b_g(nbr+1)));
         end
         if setbreaks
-            if nbr1 == max_brk;  % break points are set get linear-lsq fit to offset and slopes
+            %if nbr1 == max_brk;  % break points are set get linear-lsq fit to offset and slopes
+            if  nbr0 == max_brk % correction ccabanes 06/10/2020
                 % break points are static
                 [A, residual] = brk_pt_fit (xf, yf, W_i, breaks);
             else % we are supposed to fit over a limited number of breaks
@@ -371,7 +373,8 @@ for nbr = pbrk
 end % end for nbr
 
 %% select best fit
-if setbreaks & nbr1 == max_brk
+%if setbreaks & nbr1 == max_brk
+if setbreaks && nbr0 == max_brk %fix ccabanes 6/10/2020
     best = pbrk+2;
 else%% Decide which fit to use (offset, linear or piecewise fit)
     %    good = find(AIC > 0); % since the maximum likelyhood (residual variance)
@@ -391,7 +394,8 @@ else
     np = best;% number of parameters without break point
 end
 
-if setbreaks & nbr1 == max_brk
+%if setbreaks & nbr1 == max_brk
+if setbreaks && nbr0 == max_brk %fix ccabanes 6/10/2020
     comment = ['Fit evaluated using '];
 else
     comment = ['Best model found with '];
