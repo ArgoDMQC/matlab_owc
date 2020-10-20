@@ -278,7 +278,6 @@ end
 %    disp(['WARNING: Only have ' num2str(NDF) ' degree of freedom, will estimate offset only'])  % change config 129
 %     pbrk = -1;
 % end
-
 % if NDF < 2*(max_brk+2)+1   % if NDF is low, AIC criterium will not be valid anymore, there is a maximum number of breakpoints that can be tried
 %    if NDF>2*(nbr1+2)+1
 %    pbrk =[nbr1:floor((NDF-1)/2 -2)]; 
@@ -448,6 +447,8 @@ E = zeros(length(xfit),best);
 E(:,1) = ones(length(xfit),1);
 ixb = sorter (btem, xfit);
 if best>=2
+    % recompute A(1) in case xfit(1) is not equal to xf(1) (ccabanes,28/09/2020)
+    A(1)=A(1)+A(2)*(xfit(1)-xf(1));
     for j = 1:best-1
         ib = find (ixb == j);% pointer to x values greater than break point j
         E(ib,j+1) = xfit(ib) - btem(j);
@@ -481,11 +482,13 @@ else
         if best ==2
             [A, residual] = brk_pt_fit (xf, yf, W_i);
             % E for linear case is already calculated
-
+            % recompute A(1) in case xfit(1) is not equal to xf(1) (ccabanes,28/09/2020)
+            A(1)=A(1)+A(2)*(xfit(1)-xf(1));
         elseif setbreaks
             [A, residual] = brk_pt_fit (xf, yf, W_i, breaks);
             % E stays fixed if breaks are specified
-
+            % recompute A(1) in case xfit(1) is not equal to xf(1) (ccabanes,28/09/2020)
+             A(1)=A(1)+A(2)*(xfit(1)-xf(1));
         else
             % give initial guess as the fitted break points to speed up the
             % calculation
@@ -505,6 +508,8 @@ else
             E = zeros(length(xfit),best);
             E(:,1) = ones(length(xfit),1);
             ixb = sorter (btem, xfit);
+            % recompute A(1) in case xfit(1) is not equal to xf(1) (ccabanes,28/09/2020)
+            A(1)=A(1)+A(2)*(xfit(1)-xf(1));
             for j = 1:best-1
                 ib = find (ixb == j);% pointer to x values greater than break point j
                 E(ib,j+1) = xfit(ib) - btem(j);
