@@ -189,6 +189,11 @@ for i=1:length(Thetalevels) % build the S matrix to find var & the max number of
      if(PTMP(ti,j)==Thetalevels(i)) %this can happen when there is only 1 profile
         ki=ti;
      end
+	 
+	 if length(ki)>1   % A. Gallo 03/2021
+	    ki=ki(1);
+	 end
+	 
      if( ki~=ti&~isnan(SAL(ti,j))&~isnan(SAL(ki,j))&~isnan(PTMP(ti,j))&~isnan(PTMP(ki,j)) )
        S_temp(i,j) = interp1( [PTMP(ti,j), PTMP(ki,j)], [SAL(ti,j), SAL(ki,j)], Thetalevels(i) );
      else
