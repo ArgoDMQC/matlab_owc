@@ -152,7 +152,7 @@ set(gca,'XTickLabel',xticklabels);
 
 drawnow
 set(gcf,'papertype','usletter','paperunits','inches','paperorientation','portrait','paperposition',[.25,.75,8,9.5]);
-print('-depsc ', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_1.eps'));
+print('-depsc', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_1.eps'));
 
 
 % plot the uncalibrated theta-S curves from the float (figure 2) --------
@@ -209,7 +209,7 @@ axis([min_t,max_t,min_s,max_s]);
 drawnow
 title( strcat( title_floatname, ' uncalibrated float data (-) and mapped salinity (o) with objective errors' ) );
 set(gcf,'papertype','usletter','paperunits','inches','paperorientation','portrait','paperposition',[.25,.75,8,9.5]);
-print('-depsc ', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_2.eps'));
+print('-depsc', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_2.eps'));
 
 
 % calibration curve (figure 3) --------------------------
@@ -286,7 +286,7 @@ title( strcat(title_floatname, ' vertically-averaged salinity (PSS-78) additive 
 
 drawnow
 set(gcf,'papertype','usletter','paperunits','inches','paperorientation','portrait','paperposition',[.25,.75,8,9.5]);
-print('-depsc ', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_3.eps'));
+print('-depsc', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_3.eps'));
 
 
 % plot the calibrated theta-S curves from the float (figure 4) --------------------------
@@ -343,7 +343,7 @@ end
 drawnow
 title( strcat(title_floatname, ' calibrated float data (-) and mapped salinity (o) with objective errors' ) );
 set(gcf,'papertype','usletter','paperunits','inches','paperorientation','portrait','paperposition',[.25,.75,8,9.5]);
-print('-depsc ', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_4.eps'));
+print('-depsc', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_4.eps'));
 
 
 % Brian King's plot: salinity anomaly time series on theta levels (figure 5) ------------
@@ -371,7 +371,7 @@ title(['       Salinity anom on theta.    ' title_floatname])
 
 drawnow
 set(gcf,'papertype','usletter','paperunits','inches','paperorientation','portrait','paperposition',[.25,.5,8,10]);
-print('-depsc ', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_5.eps'));
+print('-depsc', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_5.eps'));
 
 
 % plot salinity time series on theta levels with the smallest S variance (figure 6) ------------
@@ -574,7 +574,7 @@ xlabel('float profile number');
 
 drawnow
 set(gcf,'papertype','usletter','paperunits','inches','paperorientation','portrait','paperposition',[.25,.75,8,9.5]);
-print('-depsc ', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_6.eps'));
+print('-depsc', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_6.eps'));
 
 
 % Brian King's plot: salinity anomaly time series on theta levels (figure 7) ------------
@@ -602,7 +602,7 @@ title(['Calibrated salinity anom on theta. ' title_floatname])
 
 drawnow
 set(gcf,'papertype','usletter','paperunits','inches','paperorientation','portrait','paperposition',[.25,.5,8,10]);
-print('-depsc ', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_7.eps'));
+print('-depsc', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_7.eps'));
 
 
 % Paul Robbins' analyse variance plot (figure 8) ------------
@@ -663,7 +663,7 @@ end
 
 drawnow
 set(gcf,'papertype','usletter','paperunits','inches','paperorientation','portrait','paperposition',[.5,.25,8,10.25]);
-print('-depsc ', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_8.eps'));
+print('-depsc', strcat(po_system_configuration.FLOAT_PLOTS_DIRECTORY, pn_float_dir, pn_float_name, '_8.eps'));
 
 
 end %if(isempty(find(isnan(cal_SAL)==0))==0) ---------------
