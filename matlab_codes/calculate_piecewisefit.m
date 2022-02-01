@@ -279,6 +279,8 @@ end %for each unique_cal
 
 ls_float_calib_filename = strcat( po_system_configuration.FLOAT_CALIB_DIRECTORY, pn_float_dir, po_system_configuration.FLOAT_CALIB_PREFIX, pn_float_name, po_system_configuration.FLOAT_CALIB_POSTFIX ) ;
 
-save( ls_float_calib_filename, 'cal_SAL', 'cal_SAL_err', 'pcond_factor', 'pcond_factor_err', 'cal_COND', 'cal_COND_err', ...
-       'time_deriv', 'time_deriv_err', 'sta_mean', 'sta_rms', 'sta_SAL', 'sta_SAL_err', 'PROFILE_NO', 'fcoef', 'fbreaks' )
+%save( ls_float_calib_filename, 'cal_SAL', 'cal_SAL_err', 'pcond_factor', 'pcond_factor_err', 'cal_COND', 'cal_COND_err', ...
+%       'time_deriv', 'time_deriv_err', 'sta_mean', 'sta_rms', 'sta_SAL', 'sta_SAL_err', 'PROFILE_NO', 'fcoef', 'fbreaks' )
 
+save( ls_float_calib_filename, 'cal_SAL', 'cal_SAL_err', 'pcond_factor', 'pcond_factor_err',  ...
+       'time_deriv', 'time_deriv_err', 'sta_mean', 'sta_rms', 'sta_SAL', 'sta_SAL_err', 'PROFILE_NO', 'fcoef', 'fbreaks' )
