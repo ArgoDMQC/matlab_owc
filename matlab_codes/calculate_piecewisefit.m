@@ -38,31 +38,33 @@ la_ptmp = lo_float_mapped_data.la_ptmp; % float potential temperature where mapp
 %+++++ change config 129----FROM HERE
 
 % retrieve coordinate (XYTZ) of the float position (coord_float) that is used in build_cov.m
-if ~isempty(lo_float_mapped_data.selected_hist)
+%if ~isempty(lo_float_mapped_data.selected_hist)
 % the following lines were added to make sure LONG, LAT, DATES are stored in
     % column vectors (from Dirk Slawinski-CSIRO) 
-    if size(LONG,1)>1 
-        LONG=LONG';
-    end
-    if size(LAT,1)>1  
-        LAT=LAT';
-    end
-    if size(DATES,1)>1
-        DATES=DATES';
-    end
+if size(LONG,1)>1 
+	LONG=LONG';
+end
+if size(LAT,1)>1  
+	LAT=LAT';
+end
+if size(DATES,1)>1
+	DATES=DATES';
+end
 
-    % Calculate elevation at the float position 
-    if(LONG>180) % m_tbase inputs longitudes from 0 to +/- 180
-        LONG1=LONG-360;
-    else
-        LONG1=LONG;
-    end
-    m_proj('mercator','long', [min(LONG1)-1, max(LONG1)+1], 'lat', [min(LAT)-1, max(LAT)+1] );
-    [elev,x,y] = m_tbase( [min(LONG1)-1, max(LONG1)+1, min(LAT)-1, max(LAT)+1] );
-    Z = -interp2( x,y,elev, LONG1, LAT, 'linear'); % -ve bathy values
+% Calculate elevation at the float position 
+if(LONG>180) % m_tbase inputs longitudes from 0 to +/- 180
+	LONG1=LONG-360;
+else
+	LONG1=LONG;
+end
+m_proj('mercator','long', [min(LONG1)-1, max(LONG1)+1], 'lat', [min(LAT)-1, max(LAT)+1] );
+[elev,x,y] = m_tbase( [min(LONG1)-1, max(LONG1)+1, min(LAT)-1, max(LAT)+1] );
+Z = -interp2( x,y,elev, LONG1, LAT, 'linear'); % -ve bathy values
 
-    coord_float=[LONG',LAT',DATES',Z'];
-    
+coord_float = [LONG',LAT',DATES',Z'];
+
+if isempty(lo_float_mapped_data.selected_hist)    
+   warning('No reference data selected for any profiles')
 end
 %+++++ change config 129-----TO HERE
 
