@@ -20,6 +20,9 @@ function update_salinity_mapping( pn_float_dir, pn_float_name, po_system_configu
 % Annie Wong, June 2020: rename "scale_age" to "scale_age_small", and create "scale_age_large" with NaN for old OW mapped profiles.
 % This is to make the temporal scale variable names consistent with the lat/long scale variable names in OWC.
 %
+% Delphine Dobler (DD), August 2024: 
+%            1 - Auto-create la_wmo_boxes from climatological repositores when la_wmo_boxes does not exist
+%
 
 % load float source data ----------------------------------------
 
@@ -31,8 +34,12 @@ PROFILE_NO = lo_float_source_data.PROFILE_NO ;
 
 
 % load mapping parameters -------
-
-load( strcat( po_system_configuration.CONFIG_DIRECTORY, po_system_configuration.CONFIG_WMO_BOXES ), 'la_wmo_boxes' ) ;
+% DD : 2024/08-1
+la_wmo_boxes_file=strcat( po_system_configuration.CONFIG_DIRECTORY, po_system_configuration.CONFIG_WMO_BOXES);
+if ~exist(la_wmo_boxes_file)
+    create_la_wmo_boxes_file(po_system_configuration)
+end
+load( la_wmo_boxes_file, 'la_wmo_boxes' ) ;
 
 ln_max_casts = str2num( po_system_configuration.CONFIG_MAX_CASTS ) ;
 map_use_pv = str2num( po_system_configuration.MAP_USE_PV );
