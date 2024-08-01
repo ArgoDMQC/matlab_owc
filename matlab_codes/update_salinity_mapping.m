@@ -22,7 +22,14 @@ function update_salinity_mapping( pn_float_dir, pn_float_name, po_system_configu
 %
 % Delphine Dobler (DD), August 2024: 
 %            1 - Auto-create la_wmo_boxes from climatological repositores when la_wmo_boxes does not exist
+%            2 - create output directory if they do not exist already
 %
+
+% DD (2024/08-2)
+outdir=[ po_system_configuration.FLOAT_MAPPED_DIRECTORY pn_float_dir ];
+if not(isfolder(outdir))
+    mkdir(outdir)
+end
 
 % load float source data ----------------------------------------
 

@@ -4,11 +4,20 @@ function plot_diagnostics_ow( pn_float_dir, pn_float_name, po_system_configurati
 %
 % Annie Wong, 14 June 2011
 % Breck Owens, October 2006
+%
+% Delphine Dobler (DD), August 2024: 
+%            2 - create output directory if they do not exist already
+
 %--------------------------------------------------------------------------
 
 %pn_float_dir='uw/';
 %pn_float_name='R5902134';
 %po_system_configuration = load_configuration( 'ow_config.txt' );
+
+outdir=[ po_system_configuration.FLOAT_PLOTS_DIRECTORY pn_float_dir ];
+if not(isfolder(outdir))
+    mkdir(outdir)
+end
 
 
 close all

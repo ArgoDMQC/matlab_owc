@@ -6,8 +6,16 @@ function set_calseries( pn_float_dir, pn_float_name, po_system_configuration )
 %
 % Annie Wong, September 2008
 % Breck Owens, October 2006
-%
+% 
+% Delphine Dobler (DD), August 2024: 
+%            2 - create output directory if they do not exist already
 
+
+% DD (2024/08-2)
+outdir=[ po_system_configuration.FLOAT_CALIB_DIRECTORY pn_float_dir ];
+if not(isfolder(outdir))
+    mkdir(outdir)
+end
 
 % load data ---
 
