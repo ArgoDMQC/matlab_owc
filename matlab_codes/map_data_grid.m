@@ -39,6 +39,10 @@ function [vgrid,vgriderror,vdata,vdataerror]=map_data_grid(v,posgrid,posdata,gs,
 %          Bretherton, etal, 1975) is removed.  The error estimate includes
 %          the contributions from both the mapping and the mean
 %          estimatation.
+%
+% Delphine Dobler (DD), August 2024: 
+%            3.3 - Performance: Inside map_data_grid, comment calculation
+%            of vdataerror as this is never used afterwards.
 % **********************************************************************
 
 [m,n]=size(v);
@@ -72,8 +76,11 @@ wght = Cdd*( v - vm );
 Cmd = s*covarxyt_pv(posdata, posdata, gs, ts, q, phi, pv);
 vdata = Cmd*wght + vm;
 % include error in mean (eqn 24 of Bretherton, etal)
-vdataerror = repmat(sqrt(s-diag(Cmd*Cdd*Cmd') ...
-                         +(1- sum(Cmd*Cdd,2)).^2/sum_Cdd),1,1);
+%vdataerror = repmat(sqrt(s-diag(Cmd*Cdd*Cmd') ...
+%                         +(1- sum(Cmd*Cdd,2)).^2/sum_Cdd),1,1);
+% DD (2024/08-3.3): never used afterwards, save some time (Uncomment to
+% compute)
+vdataerror = [];  
 
 % map to posgrid -----
 
