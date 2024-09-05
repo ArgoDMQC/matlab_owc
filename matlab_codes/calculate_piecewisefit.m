@@ -8,6 +8,8 @@ function calculate_piecewisefit( pn_float_dir, pn_float_name, po_system_configur
 
 %
 % Cecile Cabanes, June 2013 : calculate off-diagonal terms for error estimate: add horizontal covariance   to track changes: see "change config 129"
+% Delphine Dobler (DD), September 2024 : 
+%            4 - save computed theta levels in a file 
 
 %pn_float_dir='testfloats/';
 %pn_float_name='robbins4900178';
@@ -156,10 +158,15 @@ if sstatus == 0 % set_calseries returned a bad status variable, go ahead and wri
     return
 end
 
-% loop through sequences of calseries, ie if time series is broken into segments --
-for i=1:n_seq
+% DD (2024/09-4): initialisation of arrays to be saved in a file
+Theta_nseq=NaN*zeros(10,n_seq);
+Index=NaN*zeros(10,n);
+Plevels=NaN*zeros(10,n_seq);
 
-    calindex = find(calseries==unique_cal(i));
+% loop through sequences of calseries, ie if time series is broken into segments --
+for iseq=1:n_seq
+
+    calindex = find(calseries==unique_cal(iseq));
     k = length(calindex);
 
         % choose 10 float theta levels to use in the piecewise linear fit --------
@@ -180,6 +187,31 @@ for i=1:n_seq
 
         [Theta, P, index, var_s_th, th] =...
          find_10thetas( unique_SAL, unique_PTMP, unique_PRES, unique_la_ptmp, use_theta_gt, use_theta_lt, use_pres_gt, use_pres_lt, use_percent_gt);
+     
+        % DD (2024/09-4): Save Theta-related information for plotting functions
+        Index(:,calindex)=index;
+        Plevels(:,iseq)=P;
+        [mvth,~]=size(var_s_th);
+        Theta_nseq(:,iseq)=Theta;
+        if iseq==1
+            Var_s_Thetas=NaN.*ones(mvth,n_seq);
+            Thetas=NaN.*ones(mvth,n_seq);
+            Var_s_Thetas(:,iseq)=var_s_th;
+            Thetas(:,iseq)=th;
+        else
+            [mVth,~]=size(Var_s_Thetas);
+            tmp1=Var_s_Thetas;
+            tmp2=Thetas;
+            mm=max(mVth,mvth);
+            Var_s_Thetas=NaN.*ones(mm,n_seq);
+            Thetas=NaN.*ones(mm,n_seq);
+            Var_s_Thetas(1:mVth,:)=tmp1;
+            Var_s_Thetas(1:mvth,iseq)=var_s_th;
+            Thetas(1:mVth,:)=tmp2;
+            Thetas(1:mvth,iseq)=th;
+        end
+        % 
+        
 
         pp=find(isnan(index)==0);
         if(isempty(pp)==0) % only proceed when there are valid levels ----
@@ -229,18 +261,18 @@ for i=1:n_seq
             if isempty(breaks)
                 [xfit(calindex), pcond_factor(calindex), pcond_factor_err(calindex), time_deriv(calindex), ...
                  time_deriv_err(calindex), sta_mean(calindex), sta_rms(calindex), NDF, fitcoef, fitbreaks] = ...
-                  fit_cond(x, y, err, covariance, 'max_no_breaks', max_breaks(i));       
+                  fit_cond(x, y, err, covariance, 'max_no_breaks', max_breaks(iseq));       
             else
-                breaks_in = breaks(i,:);
+                breaks_in = breaks(iseq,:);
                 breaks_in = breaks_in(find(isfinite(breaks_in)));
-                if isempty(max_breaks(i))
+                if isempty(max_breaks(iseq))
                     [xfit(calindex), pcond_factor(calindex), pcond_factor_err(calindex), time_deriv(calindex), ...
                      time_deriv_err(calindex), sta_mean(calindex), sta_rms(calindex), NDF, fitcoef, fitbreaks] = ...
                       fit_cond(x, y, err, covariance, 'breaks', breaks_in);
                 else
                     [xfit(calindex), pcond_factor(calindex), pcond_factor_err(calindex), time_deriv(calindex), ...
                      time_deriv_err(calindex), sta_mean(calindex), sta_rms(calindex), NDF, fitcoef, fitbreaks] = ...
-                      fit_cond(x, y, err, covariance, 'breaks', breaks_in, 'max_no_breaks', max_breaks(i)); 
+                      fit_cond(x, y, err, covariance, 'breaks', breaks_in, 'max_no_breaks', max_breaks(iseq)); 
                 end
             end
 
@@ -266,9 +298,9 @@ for i=1:n_seq
                 sta_SAL1(:,calindex) = sw_salt( (sta_COND(:,calindex)+sta_COND_err(:,calindex))/sw_c3515, unique_PTMP, 0 );
                 sta_SAL_err(:,calindex) = abs(sta_SAL(:,calindex)-sta_SAL1(:,calindex));
 
-                fcoef(i,1:length(fitcoef)) = fitcoef;
+                fcoef(iseq,1:length(fitcoef)) = fitcoef;
                 if ~isempty(fitbreaks)
-                    fbreaks(i,1:length(fitbreaks)) = fitbreaks;
+                    fbreaks(iseq,1:length(fitbreaks)) = fitbreaks;
                 end
 
             end
@@ -276,6 +308,12 @@ for i=1:n_seq
         end %if there are valid levels
 end %for each unique_cal
 
+% DD (2024/09-4) : save theta levels information inside a file.
+Theta=Theta_nseq;
+ls_theta = strcat( po_system_configuration.FLOAT_CALIB_DIRECTORY, ...
+            pn_float_dir, 'selected_theta_', pn_float_name,'.mat');
+save(ls_theta, 'Theta','Index','Plevels','Var_s_Thetas','Thetas') 
+% end of DD (2024/09-4)
 
 % save calibration data --------------------------------
 
