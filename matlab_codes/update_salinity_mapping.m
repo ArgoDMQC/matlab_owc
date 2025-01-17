@@ -267,7 +267,10 @@ for i = 1 : n_profiles
         
         [ la_bhist_sal, la_bhist_ptmp, la_bhist_pres, la_bhist_lat, la_bhist_long, la_bhist_dates, loaded_bbox ] = ...
             retr_region_ow( la_wmo_numbers, pn_float_name, po_system_configuration, index, PRES, map_p_delta, loaded_bbox ) ;
-        la_bhist_Z = la_grid_Z(index);
+        
+	% 2025/01/17 correction for la_bhist_Z computation after CC's validation tests on performance improvement updates
+	% la_bhist_Z = la_grid_Z(index);
+	la_bhist_Z = la_grid_Z(index_ini);
 
         % include JB's SAF frontal separation criteria if map_use_saf==1
 
