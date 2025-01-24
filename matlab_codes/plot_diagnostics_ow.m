@@ -21,7 +21,7 @@ function plot_diagnostics_ow( pn_float_dir, pn_float_name, po_system_configurati
 %            lines, add a grid, position the legend outside the graph.
 %            4.5 - Automalically set graph 5 y-axis limits from selected thetas
 %            and set the upper bound to 14°C.
-
+% Delphine Dobler (DD), January 2025: account for Cecile Cabanes feedback on changes
 %--------------------------------------------------------------------------
 
 %pn_float_dir='uw/';
@@ -34,7 +34,7 @@ if not(isfolder(outdir))
 end
 
 % DD (2024/09 - 4.3) : Configuration parameter to select graph format
-graph_format         = 'png'; % 'png' or 'eps'
+graph_format         = 'eps'; % 'png' or 'eps'
 if strcmp(graph_format,'png')
     graph_print_option = '-dpng';
 end
@@ -299,7 +299,10 @@ p2=errorbar(PROFILE_NO, pcond_factor, pcond_factor_err,'g*-');
 ok = find(isfinite(sta_mean));
 p3=plot(PROFILE_NO(ok), sta_mean(ok), 'r-');
 plot( [0, max(PROFILE_NO)+1], [1,1], 'k-')
-legend([p1 p2 p3],{'2 x cal error','1 x cal error','1-1 profile fit'}, 'Location', 'bestoutside');
+% DD (2025/01 - 4.4) : adapt legend from CC comment:
+% legend([p1 p2 p3],{'2 x cal error','1 x cal error','1-1 profile fit'}, 'Location', 'bestoutside');
+legend([p1 p2 p3],{'2 x cal error','1 x cal error','1-1 profile fit'}, 'Location', 'Southoutside','Orientation','horizontal');
+box on
 grid on
 
 axis([ 0, max(PROFILE_NO)+1, min([pcond_factor-pcond_factor_err,1])-.0004, max([pcond_factor+pcond_factor_err,1])+.0004 ])
@@ -319,7 +322,10 @@ p2=errorbar(PROFILE_NO, avg_Soffset, avg_Soffset_err,'go-');
 ok = find(isfinite(avg_Staoffset));
 p3=plot(PROFILE_NO(ok), avg_Staoffset(ok), 'r-');
 plot( [0, max(PROFILE_NO)+1], [0,0], 'k-')
-legend([p1 p2 p3],'2 x cal error','1 x cal error','1-1 profile fit', 'Location', 'bestoutside');
+% DD (2025/01 - 4.4) : adapt legend from CC comment:
+% legend([p1 p2 p3],'2 x cal error','1 x cal error','1-1 profile fit', 'Location', 'bestoutside');
+legend([p1 p2 p3],{'2 x cal error','1 x cal error','1-1 profile fit'}, 'Location', 'Southoutside','Orientation','horizontal');
+box on
 grid on
 
 axis([ 0, max(PROFILE_NO)+1, min([avg_Soffset-avg_Soffset_err,0])-.02, max([avg_Soffset+avg_Soffset_err,0])+.02 ])
@@ -404,7 +410,9 @@ fl.useqc = '0';
 fl.plot = 1;
 % DD (2024/09 - 4.5) : automatically set y-axis limits using tlevels.
 %fl.yaxes = [2 5 20];
-fl.yaxes = [floor(min(tlevels,[],'all')) ceil(max(tlevels,[],'all')) ceil(max(TEMP))];
+% DD (2025/01 - 4.4) : adapt from CC comment
+% fl.yaxes = [floor(min(tlevels,[],'all')) ceil(max(tlevels,[],'all')) ceil(max(TEMP))];
+fl.yaxes = [floor(min(tlevels,[],'all')) ceil(max(tlevels,[],'all')) ceil(max(TEMP,[],'all'))];
 d.PSAL = SAL;
 d.TEMP = TEMP;
 d.PRES = PRES;
