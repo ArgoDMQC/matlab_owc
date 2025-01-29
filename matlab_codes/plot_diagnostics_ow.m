@@ -408,11 +408,10 @@ set(gcf,'defaultaxesfontsize',16)
 
 fl.useqc = '0';
 fl.plot = 1;
-% DD (2024/09 - 4.5) : automatically set y-axis limits using tlevels.
-%fl.yaxes = [2 5 20];
-% DD (2025/01 - 4.4) : adapt from CC comment
+% DD (2024/09 - 4.5) : automatically set y-axis limits using tlevels; 2025/01: modified from CC's comment
+% fl.yaxes = [2 5 20];
 % fl.yaxes = [floor(min(tlevels,[],'all')) ceil(max(tlevels,[],'all')) ceil(max(TEMP))];
-fl.yaxes = [floor(min(tlevels,[],'all')) ceil(max(tlevels,[],'all')) ceil(max(TEMP,[],'all'))];
+fl.yaxes = [floor(min(min(TEMP,[],'all'),2)) ceil(min(max(tlevels,[],'all'),5)) ceil(min(max(TEMP,[],'all'),20))];
 d.PSAL = SAL;
 d.TEMP = TEMP;
 d.PRES = PRES;
@@ -659,9 +658,9 @@ set(gcf,'defaultaxesfontsize',16)
 
 fl.useqc = '0';
 fl.plot = 1;
-% DD (2024/09 - 4.5) : automatically set y-axis limits using tlevels.
+% DD (2024/09 - 4.5) : automatically set y-axis limits using tlevels. 2025/01: modified from CC's comment.
 %fl.yaxes = [2 5 20];
-fl.yaxes = [floor(min(tlevels,[],'all')) ceil(max(tlevels,[],'all')) ceil(max(TEMP))];
+fl.yaxes = [floor(min(min(TEMP,[],'all'),2)) ceil(min(max(tlevels,[],'all'),5)) ceil(min(max(TEMP,[],'all'),20))];
 d.PSAL = cal_SAL;
 d.TEMP = TEMP;
 d.PRES = PRES;
