@@ -20,6 +20,23 @@ function update_salinity_mapping( pn_float_dir, pn_float_name, po_system_configu
 % Annie Wong, June 2020: rename "scale_age" to "scale_age_small", and create "scale_age_large" with NaN for old OW mapped profiles.
 % This is to make the temporal scale variable names consistent with the lat/long scale variable names in OWC.
 %
+% Delphine Dobler (DD), August 2024: 
+%            1 - Auto-create la_wmo_boxes from climatological repositores when la_wmo_boxes does not exist
+%            2 - create output directory if they do not exist already
+%            3.1 - Performance: save boxes_id from get_region_ow and
+%            recompute the index to provide as input to retr_region_ow
+%            3.2 - Performance: Inside retr_region_ow, save loaded data,
+%            and at each following profile, reload only new boxes and delete
+%            unused.
+%            3.3 - Performance: Inside map_data_grid, comment calculation
+%            of vdataerror as this is never used afterwards.
+%
+
+% DD (2024/08-2)
+outdir=[ po_system_configuration.FLOAT_MAPPED_DIRECTORY pn_float_dir ];
+if not(isfolder(outdir))
+    mkdir(outdir)
+end
 
 % load float source data ----------------------------------------
 
@@ -31,8 +48,12 @@ PROFILE_NO = lo_float_source_data.PROFILE_NO ;
 
 
 % load mapping parameters -------
-
-load( strcat( po_system_configuration.CONFIG_DIRECTORY, po_system_configuration.CONFIG_WMO_BOXES ), 'la_wmo_boxes' ) ;
+% DD : 2024/08-1
+la_wmo_boxes_file=strcat( po_system_configuration.CONFIG_DIRECTORY, po_system_configuration.CONFIG_WMO_BOXES);
+if ~exist(la_wmo_boxes_file)
+    create_la_wmo_boxes_file(po_system_configuration)
+end
+load( la_wmo_boxes_file, 'la_wmo_boxes' ) ;
 
 ln_max_casts = str2num( po_system_configuration.CONFIG_MAX_CASTS ) ;
 map_use_pv = str2num( po_system_configuration.MAP_USE_PV );
@@ -103,10 +124,18 @@ for i = 1 : length( PROFILE_NO )
 end
 clear a i
 
+% DD (2024/08-3.2): 
+n_profiles=length( missing_profile_index );
+% loaded_box record initialisation
+loaded_bbox.n_profiles=n_profiles;
+loaded_bbox.CTD.description="CTD loaded_boxes";
+loaded_bbox.ARGO.description="ARGO loaded_boxes";
+loaded_bbox.BOTTLE.description="BOTTLE loaded_boxes";
+
 
 % update mapped data matrix by missing_profile_index --------------------
 
-for i = 1 : length( missing_profile_index )
+for i = 1 : n_profiles
   tic
   disp(['UPDATE_SALINITY_MAPPING: Working on profile ' num2str(i)])
 
@@ -161,7 +190,10 @@ for i = 1 : length( missing_profile_index )
 
     [ la_wmo_numbers ] = find_25boxes( LONG, LAT, la_wmo_boxes ) ;
     % load in the positions and dates for the surrounding wmo boxes
-    [ la_grid_lat, la_grid_long, la_grid_dates ] = get_region_ow( la_wmo_numbers, pn_float_name, po_system_configuration ) ;
+    %[ la_grid_lat, la_grid_long, la_grid_dates ] = get_region_ow( la_wmo_numbers, pn_float_name, po_system_configuration ) ;
+    % DD (2024/08-3.1) add an output to the function: the box id
+    [ la_grid_lat, la_grid_long, la_grid_dates, pa_grid_box_id ] = get_region_ow( la_wmo_numbers, pn_float_name, po_system_configuration ) ;
+
 
     if( la_grid_lat~=999 ) % if no historical data is assigned to the float profile
 
@@ -171,14 +203,14 @@ for i = 1 : length( missing_profile_index )
         gg=find(la_grid_long>180);
         la_grid_long1(gg)=la_grid_long(gg)-360; % m_tbase inputs longitudes from 0 to +/- 180
 
-	m_proj('mercator','long', [min(la_grid_long1)-1, max(la_grid_long1)+1], 'lat', [min(la_grid_lat)-1, max(la_grid_lat)+1] );
+        m_proj('mercator','long', [min(la_grid_long1)-1, max(la_grid_long1)+1], 'lat', [min(la_grid_lat)-1, max(la_grid_lat)+1] );
         [elev,x,y] = m_tbase( [min(la_grid_long1)-1, max(la_grid_long1)+1, min(la_grid_lat)-1, max(la_grid_lat)+1] );
         la_grid_Z = -interp2( x,y,elev, la_grid_long1, la_grid_lat, 'linear'); % -ve bathy values
 
         % make LONG compatiable with la_grid_long at the 0-360 mark
 
         LONG2=LONG;
-	if(isempty(find(la_grid_long>360))==0)
+        if(isempty(find(la_grid_long>360))==0)
            if(LONG>=0&LONG<=20)
              LONG2=LONG+360;
            end
@@ -187,12 +219,58 @@ for i = 1 : length( missing_profile_index )
         % find ln_max_casts historical points that are most strongly correlated with the float profile
         
         %[ index ] = find_besthist( la_grid_lat, la_grid_long, la_grid_dates, la_grid_Z, LAT, LONG2, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, map_age, map_use_pv, ln_max_casts );      % change config 129 
-	[ index ] = find_besthist( la_grid_lat, la_grid_long, la_grid_dates, la_grid_Z, LAT, LONG2, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, map_age_small, map_age_large, map_use_pv, ln_max_casts );  %AW June 2020
+        [ index_ini ] = find_besthist( la_grid_lat, la_grid_long, la_grid_dates, la_grid_Z, LAT, LONG2, DATES, Z, latitude_large, latitude_small, longitude_large, longitude_small, phi_large, phi_small, map_age_small, map_age_large, map_use_pv, ln_max_casts );  %AW June 2020
 	
         clear la_grid_lat la_grid_long la_grid_dates
         
-	[ la_bhist_sal, la_bhist_ptmp, la_bhist_pres, la_bhist_lat, la_bhist_long, la_bhist_dates ] = retr_region_ow( la_wmo_numbers, pn_float_name, po_system_configuration, index, PRES, map_p_delta ) ;
-        la_bhist_Z = la_grid_Z(index);
+        % DD (2024/08-3.1) Loading boxes' data is a consuming step in terms of performance.
+        % The test if the boxes' data should be kept was initially done after the loading 
+        % inside retr_region_ow. Here we recompute the index for the boxes ids to load
+        % (now known from get_region_ow new output) beforehand to save some execution time:
+        % 'stable' option is very important in the unique function call.
+        box_id_2_keep=unique(pa_grid_box_id(index_ini),'stable');
+        n_hist_obs=size(index_ini,1);
+        if size(box_id_2_keep,1)==1
+            n_boxes=size(box_id_2_keep,2);
+        else
+            n_boxes=size(box_id_2_keep,1);
+        end
+        la_wmo_numbers=NaN(n_boxes,4);
+        n_prev_box=0;
+        new_global_index = [];
+        disp(['Fitted observations are located in ' num2str(n_boxes) ' boxes with ' num2str(n_hist_obs) ' historical observations found'])
+        
+        for ibox=1:n_boxes
+            
+            % extract the new la_wmo_numbers
+            la_wmo_numbers(ibox,:)=la_wmo_boxes(la_wmo_boxes(:,1)==box_id_2_keep(ibox),:);
+            % disp(['loaded box ' num2str(la_wmo_numbers(ibox,:))])
+            % recompute the index array
+            full_index_list_for_ibox=find(pa_grid_box_id==box_id_2_keep(ibox));
+            index_min=full_index_list_for_ibox(1);
+            index_max=full_index_list_for_ibox(end);
+            fitted_index_list_for_ibox=index_ini( (index_ini >=index_min) & (index_ini <=index_max) );
+            local_index=fitted_index_list_for_ibox-index_min+1;
+            new_global_index=[new_global_index; local_index+n_prev_box];
+            if(size(full_index_list_for_ibox,1)==1)
+                n_obs_box=size(full_index_list_for_ibox,2);
+            else
+                n_obs_box=size(full_index_list_for_ibox,1);
+            end
+            n_prev_box=n_obs_box+n_prev_box;
+        end
+        
+        index=new_global_index;
+        % end of DD (2024/08-3.1)
+        
+        
+        
+        [ la_bhist_sal, la_bhist_ptmp, la_bhist_pres, la_bhist_lat, la_bhist_long, la_bhist_dates, loaded_bbox ] = ...
+            retr_region_ow( la_wmo_numbers, pn_float_name, po_system_configuration, index, PRES, map_p_delta, loaded_bbox ) ;
+        
+	% 2025/01/17 correction for la_bhist_Z computation after CC's validation tests on performance improvement updates
+	% la_bhist_Z = la_grid_Z(index);
+	la_bhist_Z = la_grid_Z(index_ini);
 
         % include JB's SAF frontal separation criteria if map_use_saf==1
 
@@ -201,7 +279,7 @@ for i = 1 : length( missing_profile_index )
           [ la_bhist_sal2, la_bhist_ptmp2, la_bhist_pres2, la_bhist_lat2, la_bhist_long2, la_bhist_dates2, la_bhist_Z2 ] = ...
            frontalConstraintSAF(la_bhist_sal, la_bhist_ptmp, la_bhist_pres, la_bhist_lat, la_bhist_long, la_bhist_dates, la_bhist_Z, LAT, LONG, PRES, PTMP, SAL, po_system_configuration);
 
-          [a2 b2]= size(la_bhist_sal2);
+          [a2, b2]= size(la_bhist_sal2);
           if (b2>5) % Use frontal separation only if there are at least 5 profiles
             la_bhist_sal=la_bhist_sal2;
             la_bhist_ptmp=la_bhist_ptmp2;
@@ -297,7 +375,7 @@ for i = 1 : length( missing_profile_index )
 %                           longitude_large, latitude_large, NaN, signal_sal, noise_sal, phi_large, map_use_pv ) ;
 
 
-               [a1,b1,c1,d1]...
+               [a1,b1,c1,~]...
 		= map_data_grid( la_hist_sal, [ LAT, LONG, DATES, Z ], ...
 			 [ la_hist_lat, la_hist_long, la_hist_dates, la_hist_Z ], ...
 			 longitude_large, latitude_large, map_age_large, signal_sal, noise_sal, phi_large, map_use_pv ) ;
@@ -307,7 +385,7 @@ for i = 1 : length( missing_profile_index )
                la_residualsal1 = la_hist_sal - c1' ;
                la_signalresidualsal = signal( la_residualsal1 ) ;
 
-               [a2,b2,c2,d2]...
+               [a2,b2,c2,~]...
                 = map_data_grid( la_residualsal1, [ LAT, LONG, DATES, Z ], ...
                          [ la_hist_lat, la_hist_long, la_hist_dates, la_hist_Z ], ...
 				 longitude_small, latitude_small, map_age_small, la_signalresidualsal, noise_sal, phi_small, map_use_pv ) ;  %AW June 2020
@@ -337,11 +415,11 @@ for i = 1 : length( missing_profile_index )
                   selected_hist=[la_hist_long(1),la_hist_lat(1),la_profile_no(ln_profile_index)];
                end
                for k = 1 : length(la_hist_long)
-                  [m,n] = size(selected_hist);
+                  [m,~] = size(selected_hist);
                   b = [ la_hist_long(k), la_hist_lat(k) ];
                   c = selected_hist(:,1:2) - ones(m,1)*b;
                   d = find( abs(c(:,1))<1/60&abs(c(:,2))<1/60 ); %within 1 min, do not save
-		  if( isempty(d)==1 )
+                  if( isempty(d)==1 )
                     selected_hist = [ selected_hist; [ la_hist_long(k), la_hist_lat(k), la_profile_no(ln_profile_index) ] ];
                   end
                end

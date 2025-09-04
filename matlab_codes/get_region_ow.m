@@ -1,5 +1,5 @@
 
-function [ pa_grid_lat, pa_grid_long, pa_grid_dates ] = get_region_ow(pa_wmo_numbers, pa_float_name, po_config_data) ;
+function [ pa_grid_lat, pa_grid_long, pa_grid_dates, pa_grid_box_id ] = get_region_ow(pa_wmo_numbers, pa_float_name, po_config_data)
 
 % function [ pa_grid_lat, pa_grid_long, pa_grid_dates ] = get_region_ow( pa_wmo_numbers, pa_float_name, po_config_data ) ;
 %
@@ -18,12 +18,16 @@ function [ pa_grid_lat, pa_grid_long, pa_grid_dates ] = get_region_ow(pa_wmo_num
 % Annie Wong, December 2007
 % Breck Owens, December 2006
 % C.Cabanes (2015) to save time: load only long, lat, dates and source data 
+% D.Dobler (DD), August 2024: to save more time later in retr_region_ow: also output
+% corresponding boxes ids. Additional minor modifications: comment date_hist as it is unused, and
+% correct indentation twice.
 
-pa_grid_lat   = [ ] ;
-pa_grid_long  = [ ] ;
-pa_grid_dates = [ ] ;
+pa_grid_lat    = [ ] ;
+pa_grid_long   = [ ] ;
+pa_grid_dates  = [ ] ;
+pa_grid_box_id = [ ] ;
 
-[m,n]=size(pa_wmo_numbers);
+[m,~]=size(pa_wmo_numbers);
 
 
 
@@ -40,7 +44,7 @@ for ln_index = 1:m
             %toc 
 
                 not_use=[];
-                date_hist = changedates(lo_box_data.dates);
+                %date_hist = changedates(lo_box_data.dates);
                 lo_box_data.lat(not_use)=[];
                 lo_box_data.long(not_use)=[];
                 lo_box_data.dates(not_use)=[];
@@ -55,11 +59,11 @@ for ln_index = 1:m
                 not_use=[];
                 for i=1:length(lo_box_data.lat)
                   profile=lo_box_data.source{i};
-		  jj=findstr(profile,'_');
+                  jj=findstr(profile,'_');
                   ref_float=profile(1:jj-1);
                   kk=findstr(pa_float_name, ref_float);
                   if(isempty(kk)==0)
-		    not_use=[not_use,i];
+                    not_use=[not_use,i];
                   end
                 end
                 lo_box_data.lat(not_use)=[];
@@ -67,10 +71,12 @@ for ln_index = 1:m
                 lo_box_data.dates(not_use)=[];
                 %-----------------------------------------------------------------------
             end
-
-            pa_grid_lat   = [ pa_grid_lat,   lo_box_data.lat ] ;
-            pa_grid_long  = [ pa_grid_long,  lo_box_data.long ] ;
-            pa_grid_dates = [ pa_grid_dates, lo_box_data.dates ] ;
+            
+            n_observations = size(lo_box_data.lat,2);
+            pa_grid_box_id = [ pa_grid_box_id, pa_wmo_numbers(ln_index,1)*ones(1,n_observations)] ;
+            pa_grid_lat    = [ pa_grid_lat,   lo_box_data.lat ] ;
+            pa_grid_long   = [ pa_grid_long,  lo_box_data.long ] ;
+            pa_grid_dates  = [ pa_grid_dates, lo_box_data.dates ] ;
         end
     end
     fclose('all');

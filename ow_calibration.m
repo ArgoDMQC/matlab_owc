@@ -10,6 +10,9 @@
 %      float_names={'R49000139';'R39033'};
 %
 % these variables have to be set before ow_calibration is called.
+% 
+% Delphine Dobler (DD), August 2024: Add date of end of proccessing for
+% performance assessment.
 %
 
 lo_system_configuration = load_configuration( 'ow_config.txt' );
@@ -29,6 +32,8 @@ for i=1:length(float_names)
   calculate_piecewisefit( flt_dir, flt_name, lo_system_configuration );
 
   plot_diagnostics_ow( flt_dir, flt_name, lo_system_configuration );
+  
+  disp([datestr(now) ' End of processing for ' flt_name])
 
 end
 
