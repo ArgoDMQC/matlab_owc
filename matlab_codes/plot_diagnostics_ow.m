@@ -48,11 +48,17 @@ function plot_diagnostics_ow( pn_float_dir, pn_float_name, po_system_configurati
 %
 % Dirk Slawinski [DS2025] : fixes plots for newer Matlab versions
 
+
 % C.Cabanes[CC20250916], from Dirk Slawinski (PR#18): 
 % - add a goHeadless option to toggle headless mode [DS2025]
 % - add an appendRef option to append a suffix to figure names 
 % - following the same logic, add a pltFileType option to choose between
 %   differents output file types
+
+% Dirk Slawinski [DS2026-001] : floats in the Southern Ocean can have
+% problems defining a proper Y axis range for Brian's split plot.  Code
+% has been added to check if the min and max are the same value and then 
+% add 1 so data can be dsiplayed 
 %--------------------------------------------------------------------
 
 %pn_float_dir='uw/';
@@ -646,6 +652,15 @@ fl.plot = 1;
 %fl.yaxes = [floor(min(min(TEMP,[],'all'),2)) ceil(min(max(tlevels,[],'all'),5)) ceil(min(max(TEMP,[],'all'),20))];
 fl.yaxes = [floor(min(min(TEMP(:)),2)) ceil(min(max(tlevels(:)),5)) ceil(min(max(TEMP(:)),20))];
 % [/CC202509]
+% [DS2026-001/]
+brk1 = floor(min(min(TEMP(:)),2));
+brk2 = ceil(min(max(tlevels(:)),5));
+brk3 = ceil(min(max(TEMP(:)),20));
+if(brk2 == brk3)
+    brk3 = brk3 + 1;
+end
+fl.yaxes = [brk1 brk2 brk3];
+% [/DS2026-001]
 d.PSAL = SAL;
 d.TEMP = TEMP;
 d.PRES = PRES;
@@ -934,7 +949,15 @@ fl.plot = 1;
 %fl.yaxes = [floor(min(min(TEMP,[],'all'),2)) ceil(min(max(tlevels,[],'all'),5)) ceil(min(max(TEMP,[],'all'),20))];
 fl.yaxes = [floor(min(min(TEMP(:)),2)) ceil(min(max(tlevels(:)),5)) ceil(min(max(TEMP(:)),20))];
 % [/CC202509]
-
+% [DS2026-001/]
+brk1 = floor(min(min(TEMP(:)),2));
+brk2 = ceil(min(max(tlevels(:)),5));
+brk3 = ceil(min(max(TEMP(:)),20));
+if(brk2 == brk3)
+    brk3 = brk3 + 1;
+end
+fl.yaxes = [brk1 brk2 brk3];
+% [/DS2026-001]
 d.PSAL = cal_SAL;
 d.TEMP = TEMP;
 d.PRES = PRES;
